@@ -19,6 +19,7 @@
 #include "vhost_server.h"
 #include "vring.h"
 
+// vhost message handler
 typedef int (*MsgHandler)(VhostServer* vhost_server, ServerMsg* msg);
 
 static int avail_handler_server(void* context, void* buf, size_t size);
@@ -374,6 +375,9 @@ static int _set_vring_err(VhostServer* vhost_server, ServerMsg* msg)
     return 0;
 }
 
+// return value > 0 if reply is required. otherwise 0.
+// < 0 means error
+// TODO: move message handling to a separate module.
 static MsgHandler msg_handlers[VHOST_USER_MAX] = {
         0,                  // VHOST_USER_NONE
         _get_features,      // VHOST_USER_GET_FEATURES
@@ -401,6 +405,7 @@ static int in_msg_server(void* context, ServerMsg* msg)
 
     assert(msg->msg.request > VHOST_USER_NONE && msg->msg.request < VHOST_USER_MAX);
 
+    // call dedicated message handler according to request value.
     if (msg_handlers[msg->msg.request]) {
         result = msg_handlers[msg->msg.request](vhost_server, msg);
     }

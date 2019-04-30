@@ -91,7 +91,10 @@ int init_server(Server* server, int is_listen)
 
     /* init a fd_list struct, reset all fds and handler */
     init_fd_list(&server->fd_list, FD_LIST_SELECT_5);
-    /* pick an unused fd node (fd = -1) and add sock as well as handler to it */
+    /* pick an unused fd node (fd = -1) and add sock as well as handler to it.
+     * if the server is listening, read means a connection is coming in,
+     * otherwise, it means a buffer is comming in.
+     */
     add_fd_list(&server->fd_list, FD_READ, server->sock, (void*) server,
             is_listen?accept_sock_server:receive_sock_server);
 
@@ -115,6 +118,9 @@ int end_server(Server* server)
     return 0;
 }
 
+/* there is data coming in from socket
+ * further logic continues at common.c vhost_user_recv_fds and vhost_user_send_fds
+ */
 static int receive_sock_server(FdNode* node)
 {
     Server* server = (Server*) node->context;
@@ -125,6 +131,7 @@ static int receive_sock_server(FdNode* node)
 
     msg.fd_num = sizeof(msg.fds)/sizeof(int);
 
+    // Receive data from the other side
     r = vhost_user_recv_fds(sock, &msg.msg, msg.fds, &msg.fd_num);
     if (r < 0) {
         perror("recv");
@@ -141,10 +148,11 @@ static int receive_sock_server(FdNode* node)
 #endif
         r = 0;
         // Handle the packet to the registered server backend
+        // see vhost_server in_msg_server()
         if (server->handlers.in_handler) {
             void* ctx = server->handlers.context;
             r = server->handlers.in_handler(ctx, &msg);
-            if ( r < 0) {
+            if (r < 0) {
                 fprintf(stderr, "Error processing message: %s\n",
                         cmd_from_vhostmsg(&msg.msg));
                 status = ServerSockError;
@@ -161,18 +169,19 @@ static int receive_sock_server(FdNode* node)
                 msg.msg.flags &= ~VHOST_USER_VERSION_MASK;
                 msg.msg.flags |= VHOST_USER_VERSION;
                 msg.msg.flags |= VHOST_USER_REPLY_MASK;
+                // Send data to the other side
                 if (vhost_user_send_fds(sock, &msg.msg, 0, 0) < 0) {
                     perror("send");
                     status = ServerSockError;
                 }
             }
         }
-
     }
 
     return status;
 }
 
+/* Accept a connection and add the socket to the fd polling list */
 static int accept_sock_server(FdNode* node)
 {
     int sock;
@@ -190,6 +199,7 @@ static int accept_sock_server(FdNode* node)
 
     add_fd_list(&server->fd_list, FD_READ, sock, (void*) server, receive_sock_server);
 
+    // this return value is discarded by process_fd_set
     return status;
 }
 

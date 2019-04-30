@@ -1,4 +1,4 @@
-SOURCES=main.c common.c 
+SOURCES=main.c common.c debug.c
 SOURCES+=shm.c fd_list.c stat.c vring.c
 SOURCES+=server.c vhost_server.c
 SOURCES+=client.c vhost_client.c
@@ -21,4 +21,3 @@ ${BIN}: ${SOURCES} ${HEADERS}
 
 clean:
 		rm -rf ${BIN}
-

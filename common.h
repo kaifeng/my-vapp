@@ -41,12 +41,11 @@ struct ServerMsg;
 typedef int (*InMsgHandler)(void* context, struct ServerMsg* msg);
 typedef int (*PollHandler)(void* context);
 
-struct AppHandlers {
+typedef struct AppHandlers {
     void* context;
     InMsgHandler in_handler;
     PollHandler poll_handler;
-};
-typedef struct AppHandlers AppHandlers;
+} AppHandlers;
 
 struct VhostUserMsg;
 
@@ -58,11 +57,12 @@ struct vring_avail;
 struct vring_used;
 struct vhost_vring;
 
+int vhost_user_send_fds(int fd, const struct VhostUserMsg *msg, int *fds, size_t fd_num);
+int vhost_user_recv_fds(int fd, const struct VhostUserMsg *msg, int *fds, size_t *fd_num);
+
+// debug utilities
 void dump_buffer(uint8_t* p, size_t len);
 void dump_vring(struct vring_desc* desc, struct vring_avail* avail,struct vring_used* used);
 void dump_vhost_vring(struct vhost_vring* vring);
-
-int vhost_user_send_fds(int fd, const struct VhostUserMsg *msg, int *fds, size_t fd_num);
-int vhost_user_recv_fds(int fd, const struct VhostUserMsg *msg, int *fds, size_t *fd_num);
 
 #endif /* COMMON_H_ */
