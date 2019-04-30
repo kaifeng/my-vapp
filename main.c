@@ -37,9 +37,11 @@ int main(int argc, char* argv[])
 
         switch (opt) {
         case 'q':
+            /* vhost-user client, can be qemu */
             vhost_master = new_vhost_client(optarg);
             break;
         case 's':
+            /* vhost-user backend, who creates the unit domain socket */
             vhost_slave = new_vhost_server(optarg, 1 /*is_listen*/);
             break;
         case 'c':

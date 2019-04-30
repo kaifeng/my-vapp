@@ -53,6 +53,7 @@ static FdNode* find_fd_node_by_fd(FdNode* fds, int fd)
     return 0;
 }
 
+/* find an unsed fdnode and add specified fd/context/handler to the list */
 int add_fd_list(FdList* fd_list, FdType type, int fd, void* context,
         FdHandler handler)
 {
@@ -107,18 +108,23 @@ static int fd_set_from_fd_list(FdList* fd_list, FdType type, fd_set* fdset)
 static int process_fd_set(FdList* fd_list, FdType type, fd_set* fdset)
 {
     int idx;
+    int num_of_fds = 0;     // introduced fix
     FdNode* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
 
     for (idx = 0; idx < FD_LIST_SIZE; idx++) {
         FdNode* node = &(fds[idx]);
         if (FD_ISSET(node->fd,fdset)) {
+            num_of_fds++;
+            /* fd handler could be accept_sock_server (listen) or
+               receive_sock_server (connect) */
             if (node->handler) {
                 node->handler(node);
             }
         }
     }
 
-    return 0;
+    // return 0;
+    return num_of_fds;
 }
 
 int traverse_fd_list(FdList* fd_list)
@@ -139,6 +145,9 @@ int traverse_fd_list(FdList* fd_list)
     } else if (r == 0) {
         // no ready fds, timeout
     } else {
+        // non-zero, something available
+        // check accept_sock_server (listen) or receive_sock_server (connect) for further
+        // processing logic
         int rr = process_fd_set(fd_list, FD_READ, &read_fdset);
         int wr = process_fd_set(fd_list, FD_WRITE, &write_fdset);
         if (r != (rr + wr)) {

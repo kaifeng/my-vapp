@@ -33,8 +33,8 @@ typedef struct VhostServer {
     VringTable vring_table;
 
     int is_polling;
-    uint8_t buffer[BUFFER_SIZE];
-    uint32_t buffer_size;
+    uint8_t buffer[BUFFER_SIZE];    // a vhost private buffer for unkown usage
+    uint32_t buffer_size;   // size of buffer ^ used
     Stat stat;
 } VhostServer;
 

@@ -32,6 +32,7 @@ typedef enum {
 static int receive_sock_server(FdNode* node);
 static int accept_sock_server(FdNode* node);
 
+/* alloc a new socket server struct, initialize state to INSTANCE_CREATED */
 Server* new_server(const char* path)
 {
     Server* server = (Server*) calloc(1, sizeof(Server));
@@ -44,6 +45,9 @@ Server* new_server(const char* path)
     return server;
 }
 
+/* initialize socket, start service or connect.
+ * on sucess, server state -> INSTANCE_INITIALIZED
+ */
 int init_server(Server* server, int is_listen)
 {
     struct sockaddr_un un;
@@ -85,8 +89,9 @@ int init_server(Server* server, int is_listen)
         }
     }
 
-    init_fd_list(&server->fd_list,FD_LIST_SELECT_5);
-
+    /* init a fd_list struct, reset all fds and handler */
+    init_fd_list(&server->fd_list, FD_LIST_SELECT_5);
+    /* pick an unused fd node (fd = -1) and add sock as well as handler to it */
     add_fd_list(&server->fd_list, FD_READ, server->sock, (void*) server,
             is_listen?accept_sock_server:receive_sock_server);
 
@@ -95,12 +100,14 @@ int init_server(Server* server, int is_listen)
     return 0;
 }
 
+/* close socket, server state -> INSTANCE_END */
 int end_server(Server* server)
 {
     if (server->status != INSTANCE_INITIALIZED)
         return 0;
 
     // Close and unlink the socket
+    // TODO: there is no unlink here)
     close(server->sock);
 
     server->status = INSTANCE_END;
@@ -198,7 +205,7 @@ int loop_server(Server* server)
 
 int set_handler_server(Server* server, AppHandlers* handlers)
 {
-    memcpy(&server->handlers,handlers, sizeof(AppHandlers));
+    memcpy(&server->handlers, handlers, sizeof(AppHandlers));
 
     return 0;
 }

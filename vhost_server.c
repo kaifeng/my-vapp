@@ -33,9 +33,15 @@ VhostServer* new_vhost_server(const char* path, int is_listen)
 
     //TODO: handle errors here
 
+    /* alloc and init socket server */
     vhost_server->server = new_server(path);
     init_server(vhost_server->server, is_listen);
 
+    /* now INSTANCE_INITIALIZED */
+
+    /* code below cleans up all VhostServer fields
+     * shoudn't codes below placed before the socket op?
+     */
     vhost_server->memory.nregions = 0;
 
     // VringTable initalization
@@ -56,7 +62,7 @@ VhostServer* new_vhost_server(const char* path, int is_listen)
 
     vhost_server->buffer_size = 0;
     vhost_server->is_polling = 0;
-    init_stat(&vhost_server->stat);
+    init_stat(&vhost_server->stat);    // init time stat struct
 
     return vhost_server;
 }

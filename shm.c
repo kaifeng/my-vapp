@@ -88,6 +88,7 @@ int end_shm(const char* path, void* ptr, size_t size, int idx)
     return 0;
 }
 
+/* synchronize a file with a memory map */
 int sync_shm(void* ptr, size_t size)
 {
     return msync(ptr, size, MS_SYNC | MS_INVALIDATE);

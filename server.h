@@ -25,8 +25,9 @@ struct ServerMsg {
 
 typedef struct ServerMsg ServerMsg;
 
+/* struct for maintaining socket server */
 struct ServerStruct {
-    char path[PATH_MAX + 1];
+    char path[PATH_MAX + 1];    // unix domain socket path
     int status;
     int sock;
     FdList fd_list;

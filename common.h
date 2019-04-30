@@ -34,6 +34,8 @@
 
 #define DUMP_PACKETS
 
+#define LOG(fmt, ...)                printf(fmt, ##__VA_ARGS__)
+
 struct ServerMsg;
 
 typedef int (*InMsgHandler)(void* context, struct ServerMsg* msg);

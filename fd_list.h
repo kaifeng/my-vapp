@@ -33,7 +33,7 @@ typedef struct {
     int fdmax;
     FdNode  read_fds[FD_LIST_SIZE];
     FdNode  write_fds[FD_LIST_SIZE];
-    uint32_t    ms;
+    uint32_t    ms;     // poll timeout value in ms
 } FdList;
 
 typedef enum {

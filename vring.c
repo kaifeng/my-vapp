@@ -23,6 +23,8 @@
 
 #define VRING_IDX_NONE          ((uint16_t)-1)
 
+/* Initialize a vhost_vring structure from the provided base
+   address of shared memory. */
 static struct vhost_vring* new_vring(void* vring_base)
 {
     struct vhost_vring* vring = (struct vhost_vring*) vring_base;
@@ -49,7 +51,6 @@ static struct vhost_vring* new_vring(void* vring_base)
 
     vring->avail.idx = 0;
     vring->used.idx =  0;
-
 
     sync_shm(vring_base, initialized_size);
 
