@@ -107,7 +107,7 @@ int vhost_ioctl(Client* client, VhostUserRequest request, ...)
     msg.size = 0;
 
 #if 1
-    LOG("%s: Send message %d\n", __FUNCTION__, request);
+    LOG("%s: Send message %s\n", __FUNCTION__, cmd_from_vhost_request(request));
 #endif
 
     switch (request) {

@@ -9,9 +9,9 @@
 #include "vhost_user.h"
 
 // Convert message request type to human readable string
-const char* cmd_from_vhostmsg(const VhostUserMsg* msg)
+const char* cmd_from_vhost_request(VhostUserRequest request)
 {
-    switch (msg->request) {
+    switch (request) {
     case VHOST_USER_NONE:
         return "VHOST_USER_NONE";
     case VHOST_USER_GET_FEATURES:
@@ -53,7 +53,7 @@ const char* cmd_from_vhostmsg(const VhostUserMsg* msg)
 void dump_vhostmsg(const VhostUserMsg* msg)
 {
     int i = 0;
-    fprintf(stdout, "Cmd: %s (0x%x)\n", cmd_from_vhostmsg(msg), msg->request);
+    fprintf(stdout, "Cmd: %s (0x%x)\n", cmd_from_vhost_request(msg->request), msg->request);
     fprintf(stdout, "Flags: 0x%x\n", msg->flags);
 
     // command specific `dumps`

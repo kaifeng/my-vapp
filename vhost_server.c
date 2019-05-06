@@ -401,7 +401,7 @@ static int in_msg_server(void* context, ServerMsg* msg)
     VhostServer* vhost_server = (VhostServer*) context;
     int result = 0;
 
-    fprintf(stdout, "Processing message: %s\n", cmd_from_vhostmsg(&msg->msg));
+    fprintf(stdout, "Processing message: %s\n", cmd_from_vhost_request(msg->msg.request));
 
     assert(msg->msg.request > VHOST_USER_NONE && msg->msg.request < VHOST_USER_MAX);
 

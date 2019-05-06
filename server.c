@@ -154,7 +154,7 @@ static int receive_sock_server(FdNode* node)
             r = server->handlers.in_handler(ctx, &msg);
             if (r < 0) {
                 fprintf(stderr, "Error processing message: %s\n",
-                        cmd_from_vhostmsg(&msg.msg));
+                        cmd_from_vhost_request(msg.msg.request));
                 status = ServerSockError;
             }
         } else {

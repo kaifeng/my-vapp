@@ -14,6 +14,7 @@
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "vhost_user.h"
 
 #define INSTANCE_CREATED        1
 #define INSTANCE_INITIALIZED    2
@@ -48,8 +49,9 @@ typedef struct AppHandlers {
 } AppHandlers;
 
 struct VhostUserMsg;
+enum VhostUserRequest;
 
-const char* cmd_from_vhostmsg(const struct VhostUserMsg* msg);
+const char* cmd_from_vhost_request(VhostUserRequest request);
 void dump_vhostmsg(const struct VhostUserMsg* msg);
 
 struct vring_desc;
