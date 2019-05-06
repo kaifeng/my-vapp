@@ -60,6 +60,14 @@ struct vhost_vring;
 int vhost_user_send_fds(int fd, const struct VhostUserMsg *msg, int *fds, size_t fd_num);
 int vhost_user_recv_fds(int fd, const struct VhostUserMsg *msg, int *fds, size_t *fd_num);
 
+// shared memory interface
+extern int shm_fds[];
+void* init_shm(const char* path, size_t size, int idx);
+void* init_shm_from_fd(int fd, size_t size);
+int end_shm(const char* path, void* ptr, size_t size, int idx);
+
+int sync_shm(void* ptr, size_t size);
+
 // debug utilities
 void dump_buffer(uint8_t* p, size_t len);
 void dump_vring(struct vring_desc* desc, struct vring_avail* avail,struct vring_used* used);

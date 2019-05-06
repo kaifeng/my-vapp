@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 #include "packet.h"
-#include "shm.h"
+#include "common.h"
 #include "stat.h"
 #include "vhost_client.h"
 

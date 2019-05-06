@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 #include "fd_list.h"
-#include "shm.h"
+#include "common.h"
 #include "vhost_server.h"
 #include "vring.h"
 

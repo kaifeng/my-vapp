@@ -21,7 +21,7 @@
 #include <sys/unistd.h>
 
 #include "client.h"
-#include "shm.h"
+#include "common.h"
 #include "vhost_user.h"
 
 extern int app_running;
