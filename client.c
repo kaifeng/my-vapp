@@ -26,18 +26,19 @@
 
 extern int app_running;
 
+/* 类似Server，创建一个Client实例 */
 Client* new_client(const char* path)
 {
     Client* client = (Client*) calloc(1, sizeof(Client));
-
     //TODO: handle errors here
 
     strncpy(client->sock_path, path ? path : VHOST_SOCK_NAME, PATH_MAX);
-    client->status = INSTANCE_CREATED;
+    client->status = INSTANCE_CREATED;  // 作用不大，可以考虑去掉
 
     return client;
 }
 
+/* 创建unix domain socket并连接到目的端，初始化fd list */
 int init_client(Client* client)
 {
     struct sockaddr_un un;
@@ -55,7 +56,7 @@ int init_client(Client* client)
     un.sun_family = AF_UNIX;
     strcpy(un.sun_path, client->sock_path);
 
-    len = sizeof(un.sun_family) + strlen(client->sock_path);
+    len = sizeof(un.sun_family) + strlen(client->sock_path);    // why not sizeof(un)?
 
     // Connect
     if (connect(client->sock, (struct sockaddr *) &un, len) == -1) {
@@ -70,6 +71,7 @@ int init_client(Client* client)
     return 0;
 }
 
+// 关闭socket连接
 int end_client(Client* client)
 {
     if (client->status != INSTANCE_INITIALIZED)
@@ -83,6 +85,7 @@ int end_client(Client* client)
     return 0;
 }
 
+// 通过socket发送VhostUser消息
 int vhost_ioctl(Client* client, VhostUserRequest request, ...)
 {
     void *arg;
@@ -102,6 +105,10 @@ int vhost_ioctl(Client* client, VhostUserRequest request, ...)
     msg.flags &= ~VHOST_USER_VERSION_MASK;
     msg.flags |= VHOST_USER_VERSION;
     msg.size = 0;
+
+#if 1
+    LOG("%s: Send message %d\n", __FUNCTION__, request);
+#endif
 
     switch (request) {
     case VHOST_USER_GET_FEATURES:

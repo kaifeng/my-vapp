@@ -444,7 +444,7 @@ static int poll_server(void* context)
 
 static AppHandlers vhost_server_handlers =
 {
-        .context = 0,
+        .context = NULL,
         .in_handler = in_msg_server,
         .poll_handler = poll_server
 };

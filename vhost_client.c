@@ -63,6 +63,7 @@ VhostClient* new_vhost_client(const char* path)
     return vhost_client;
 }
 
+// client的初始化流程，与server的消息交互在此
 int init_vhost_client(VhostClient* vhost_client)
 {
     int idx;
@@ -78,6 +79,7 @@ int init_vhost_client(VhostClient* vhost_client)
     vhost_ioctl(vhost_client->client, VHOST_USER_SET_MEM_TABLE, &vhost_client->memory);
 
     // push the vring table info to the server
+    // 2个vring，一个收，一个发
     if (set_host_vring_table(vhost_client->vring_table_shm, VHOST_CLIENT_VRING_NUM,
             vhost_client->client) != 0) {
         // TODO: handle error here
@@ -203,8 +205,8 @@ static int poll_client(void* context)
 
 static AppHandlers vhost_client_handlers =
 {
-        .context = 0,
-        .in_handler = 0,
+        .context = NULL,
+        .in_handler = NULL,
         .poll_handler = poll_client
 };
 
