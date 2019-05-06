@@ -162,7 +162,7 @@ void* init_shm(const char* path, size_t size, int idx)
         goto err;
     }
 
-    result = init_shm_from_fd(fd, size);
+    result = map_shm_from_fd(fd, size);
     if (!result) {
         goto err;
     }
@@ -177,7 +177,7 @@ err:
 }
 
 /* 映身共享内存 */
-void* init_shm_from_fd(int fd, size_t size) {
+void* map_shm_from_fd(int fd, size_t size) {
     void *result = mmap(0, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (result == MAP_FAILED) {
         perror("mmap");
