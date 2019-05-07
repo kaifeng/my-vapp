@@ -57,7 +57,7 @@ VhostClient* new_vhost_client(const char* path)
     // init vrings on the shm (through memory regions)
     if (vring_table_from_memory_region(vhost_client->vring_table_shm, VHOST_CLIENT_VRING_NUM,
             &vhost_client->memory) != 0) {
-        // TODO: handle error here
+        perror("init vring_table from memory region");
     }
 
     return vhost_client;
@@ -71,11 +71,25 @@ int init_vhost_client(VhostClient* vhost_client)
     if (!vhost_client->client)
         return -1;
 
+    // 初始化socket client并建立连接
     if (init_client(vhost_client->client) != 0)
         return -1;
 
+    /* VHOST_USER_SET_OWNER (3)
+       Issued when a new connection is established. It sets the current Master
+       as an owner of the session. This can be used on the Slave as a
+       "session start" flag.
+    */
     vhost_ioctl(vhost_client->client, VHOST_USER_SET_OWNER, 0);
+
+    /* VHOST_USER_GET_FEATURES (1)
+       Get from the underlying vhost implementation the features bitmask.
+       Feature bit VHOST_USER_F_PROTOCOL_FEATURES signals slave support for
+       VHOST_USER_GET_PROTOCOL_FEATURES and VHOST_USER_SET_PROTOCOL_FEATURES.
+       Slave payload: u64
+    */
     vhost_ioctl(vhost_client->client, VHOST_USER_GET_FEATURES, &vhost_client->features);
+    
     vhost_ioctl(vhost_client->client, VHOST_USER_SET_MEM_TABLE, &vhost_client->memory);
 
     // push the vring table info to the server

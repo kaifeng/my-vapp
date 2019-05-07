@@ -29,6 +29,7 @@ static struct vhost_vring* new_vring(void* vring_base)
 {
     struct vhost_vring* vring = (struct vhost_vring*) vring_base;
     int i = 0;
+    // 游标，用来初始化desc里的buffer地址
     uintptr_t ptr = (uintptr_t) ((char*)vring + sizeof(struct vhost_vring));
     size_t initialized_size = 0;
 
