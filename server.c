@@ -110,8 +110,8 @@ int end_server(Server* server)
         return 0;
 
     // Close and unlink the socket
-    // TODO: there is no unlink here)
     close(server->sock);
+    unlink(server->path);
 
     server->status = INSTANCE_END;
 
