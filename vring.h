@@ -45,11 +45,16 @@ struct vring_avail {
   uint16_t ring[VHOST_VRING_SIZE];
 };
 
+struct vring_used_elem {
+  uint32_t id;
+  uint32_t len;
+};
+
 // ring of descriptors that have already been processed
 struct vring_used {
   uint16_t flags;
   uint16_t idx;
-  struct vring_used_elem { uint32_t id; uint32_t len; } ring[VHOST_VRING_SIZE];
+  struct vring_used_elem ring[VHOST_VRING_SIZE];
 };
 
 struct vhost_vring {
