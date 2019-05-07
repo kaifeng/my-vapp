@@ -128,7 +128,7 @@ static int _get_features(VhostServer* vhost_server, ServerMsg* msg)
     fprintf(stdout, "%s\n", __FUNCTION__);
 
     msg->msg.u64 = 0; // no features
-    msg->msg.size = MEMB_SIZE(VhostUserMsg,u64);
+    msg->msg.size = MEMBER_SIZE(VhostUserMsg,u64);
 
     return 1; // should reply back
 }
@@ -253,7 +253,7 @@ static int _get_vring_base(VhostServer* vhost_server, ServerMsg* msg)
     assert(idx<VHOST_CLIENT_VRING_NUM);
 
     msg->msg.state.num = vhost_server->vring_table.vring[idx].last_avail_idx;
-    msg->msg.size = MEMB_SIZE(VhostUserMsg,state);
+    msg->msg.size = MEMBER_SIZE(VhostUserMsg,state);
 
     return 1; // should reply back
 }

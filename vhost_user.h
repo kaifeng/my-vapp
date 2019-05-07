@@ -15,6 +15,8 @@
 
 #include "vhost.h"
 
+/* Definition for vhost user Memory regions description
+ */
 typedef struct VhostUserMemoryRegion {
     uint64_t guest_phys_addr;
     uint64_t memory_size;
@@ -28,6 +30,8 @@ typedef struct VhostUserMemory {
     VhostUserMemoryRegion regions[VHOST_MEMORY_MAX_NREGIONS];
 } VhostUserMemory;
 
+/* Definition for vhost user requests
+ */
 typedef enum VhostUserRequest {
     VHOST_USER_NONE = 0,
     VHOST_USER_GET_FEATURES = 1,
@@ -64,10 +68,10 @@ typedef struct VhostUserMsg {
     };
 }  __attribute__((packed)) VhostUserMsg;
 
-#define MEMB_SIZE(t,m)      (sizeof(((t*)0)->m))
-#define VHOST_USER_HDR_SIZE (MEMB_SIZE(VhostUserMsg,request) \
-                            + MEMB_SIZE(VhostUserMsg,flags) \
-                            + MEMB_SIZE(VhostUserMsg,size))
+#define MEMBER_SIZE(t,m)      (sizeof(((t*)0)->m))
+#define VHOST_USER_HDR_SIZE (MEMBER_SIZE(VhostUserMsg,request) \
+                            + MEMBER_SIZE(VhostUserMsg,flags) \
+                            + MEMBER_SIZE(VhostUserMsg,size))
 
 /* The version of the protocol we support */
 #define VHOST_USER_VERSION    (0x1)

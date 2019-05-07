@@ -119,7 +119,7 @@ int vhost_ioctl(Client* client, VhostUserRequest request, ...)
     case VHOST_USER_SET_FEATURES:
     case VHOST_USER_SET_LOG_BASE:
         msg.u64 = *((uint64_t*) arg);
-        msg.size = MEMB_SIZE(VhostUserMsg,u64);
+        msg.size = MEMBER_SIZE(VhostUserMsg,u64);
         break;
 
     case VHOST_USER_SET_OWNER:
@@ -128,8 +128,8 @@ int vhost_ioctl(Client* client, VhostUserRequest request, ...)
 
     case VHOST_USER_SET_MEM_TABLE:
         memcpy(&msg.memory, arg, sizeof(VhostUserMemory));
-        msg.size = MEMB_SIZE(VhostUserMemory,nregions);
-        msg.size += MEMB_SIZE(VhostUserMemory,padding);
+        msg.size = MEMBER_SIZE(VhostUserMemory,nregions);
+        msg.size += MEMBER_SIZE(VhostUserMemory,padding);
         for(;fd_num < msg.memory.nregions;fd_num++) {
             fds[fd_num] = shm_fds[fd_num];
             msg.size += sizeof(VhostUserMemoryRegion);
@@ -142,13 +142,13 @@ int vhost_ioctl(Client* client, VhostUserRequest request, ...)
 
     case VHOST_USER_SET_VRING_NUM:
     case VHOST_USER_SET_VRING_BASE:
-        memcpy(&msg.state, arg, MEMB_SIZE(VhostUserMsg,state));
-        msg.size = MEMB_SIZE(VhostUserMsg,state);
+        memcpy(&msg.state, arg, MEMBER_SIZE(VhostUserMsg,state));
+        msg.size = MEMBER_SIZE(VhostUserMsg,state);
         break;
 
     case VHOST_USER_SET_VRING_ADDR:
-        memcpy(&msg.addr, arg, MEMB_SIZE(VhostUserMsg,addr));
-        msg.size = MEMB_SIZE(VhostUserMsg,addr);
+        memcpy(&msg.addr, arg, MEMBER_SIZE(VhostUserMsg,addr));
+        msg.size = MEMBER_SIZE(VhostUserMsg,addr);
         break;
 
     case VHOST_USER_SET_VRING_KICK:
@@ -156,7 +156,7 @@ int vhost_ioctl(Client* client, VhostUserRequest request, ...)
     case VHOST_USER_SET_VRING_ERR:
         file = arg;
         msg.u64 = file->index;
-        msg.size = MEMB_SIZE(VhostUserMsg,u64);
+        msg.size = MEMBER_SIZE(VhostUserMsg,u64);
         if (file->fd > 0) {
             fds[fd_num++] = file->fd;
         }
