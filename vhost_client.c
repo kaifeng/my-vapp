@@ -118,7 +118,10 @@ int end_vhost_client(VhostClient* vhost_client)
     // free all shared memory mappings
     for (i = 0; i<vhost_client->memory.nregions; i++)
     {
-        end_shm(vhost_client->client->sock_path,
+        // Seems wrong, sock_path is from cmdline,
+        // but shm is created via VHOST_SOCK_NAME in init_vhost_client
+        // see unlinked files in /dev/shm
+        end_shm( VHOST_SOCK_NAME /* vhost_client->client->sock_path */,
                 (void*) (uintptr_t) vhost_client->memory.regions[i].guest_phys_addr,
                 vhost_client->memory.regions[i].memory_size, i);
     }

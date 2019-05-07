@@ -197,6 +197,8 @@ int end_shm(const char* path, void* ptr, size_t size, int idx)
 
     sprintf(path_idx, "%s%d", path, idx);
 
+    LOG("%s: remove shared memory %d, path %s\n", __FUNCTION__, idx, path_idx);
+
     if (munmap(ptr, size) != 0) {
         perror("munmap");
         return -1;
