@@ -58,6 +58,7 @@ static struct vhost_vring* new_vring(void* vring_base)
     return vring;
 }
 
+// 在指定的共享内存位置初始化vring_table
 int vring_table_from_memory_region(struct vhost_vring* vring_table[], size_t vring_table_num,
         VhostUserMemory *memory)
 {
@@ -129,6 +130,7 @@ int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_n
     return 0;
 }
 
+// 通过vring发送数据
 int put_vring(VringTable* vring_table, uint32_t v_idx, void* buf, size_t size)
 {
     struct vring_desc* desc = vring_table->vring[v_idx].desc;

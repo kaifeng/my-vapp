@@ -421,11 +421,13 @@ static int poll_server(void* context)
 
     if (vhost_server->vring_table.vring[rx_idx].desc) {
         // process TX ring
+        LOG("%s: is_polling %d\n", __FUNCTION__, vhost_server->is_polling);
         if (vhost_server->is_polling) {
             _poll_avail_vring(vhost_server, tx_idx);
         }
 
         // process RX ring
+        LOG("%s: buffer_size %d\n", __FUNCTION__, vhost_server->buffer_size);
         if (vhost_server->buffer_size) {
             // send a packet from the buffer
             put_vring(&vhost_server->vring_table, rx_idx,

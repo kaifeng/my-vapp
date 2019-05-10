@@ -186,7 +186,7 @@ void* map_shm_from_fd(int fd, size_t size) {
     return result;
 }
 
-/* 取消共享内存映射并删除共享内存 */
+/* 取消共享内存映射并删除共享内存fd */
 int end_shm(const char* path, void* ptr, size_t size, int idx)
 {
     char path_idx[PATH_MAX];
@@ -195,18 +195,20 @@ int end_shm(const char* path, void* ptr, size_t size, int idx)
         close(shm_fds[idx]);
     }
 
-    sprintf(path_idx, "%s%d", path, idx);
-
-    LOG("%s: remove shared memory %d, path %s\n", __FUNCTION__, idx, path_idx);
-
     if (munmap(ptr, size) != 0) {
         perror("munmap");
         return -1;
     }
 
-    if (shm_unlink(path_idx) != 0) {
-        perror("shm_unlink");
-        return -1;
+    // server can be null here, something wrong in the code flow.
+    // unlink should only performed for who creates the shm.
+    if(path != NULL) {
+        sprintf(path_idx, "%s%d", path, idx);
+        LOG("%s: remove shared memory %d, path %s\n", __FUNCTION__, idx, path_idx);
+        if (shm_unlink(path_idx) != 0) {
+            perror("shm_unlink");
+            return -1;
+        }
     }
 
     return 0;

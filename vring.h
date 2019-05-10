@@ -64,13 +64,13 @@ struct vhost_vring {
   struct vring_used used                   __attribute__((aligned(4096)));
 };
 
-typedef int (*AvailHandler)(void* context, void* buf, size_t size);
-typedef uintptr_t (*MapHandler)(void* context, uint64_t addr);
+typedef int (*avail_handler_t)(void* context, void* buf, size_t size);
+typedef uintptr_t (*map_handler_t)(void* context, uint64_t addr);
 
 typedef struct {
     void* context;
-    AvailHandler avail_handler;
-    MapHandler map_handler;
+    avail_handler_t avail_handler;
+    map_handler_t map_handler;
 } ProcessHandler;
 
 typedef struct {
@@ -85,7 +85,6 @@ typedef struct {
 
 struct VhostUserMemory;
 
-// TODO: these are NET specific
 #define VHOST_CLIENT_VRING_IDX_RX   0
 #define VHOST_CLIENT_VRING_IDX_TX   1
 #define VHOST_CLIENT_VRING_NUM      2

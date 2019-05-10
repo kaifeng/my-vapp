@@ -89,7 +89,13 @@ int init_vhost_client(VhostClient* vhost_client)
        Slave payload: u64
     */
     vhost_ioctl(vhost_client->client, VHOST_USER_GET_FEATURES, &vhost_client->features);
-    
+
+    /* VHOST_USER_SET_MEM_TABLE (5)
+       Sets the memory map regions on the slave so it can translate the vring
+       addresses. In the ancillary data there is an array of file descriptors
+       for each memory mapped region. The size and ordering of the fds matches
+       the number and ordering of memory regions.
+     */
     vhost_ioctl(vhost_client->client, VHOST_USER_SET_MEM_TABLE, &vhost_client->memory);
 
     // push the vring table info to the server
@@ -102,7 +108,7 @@ int init_vhost_client(VhostClient* vhost_client)
     // VringTable initalization
     vhost_client->vring_table.handler.context = (void*) vhost_client;
     vhost_client->vring_table.handler.avail_handler = avail_handler_client;
-    vhost_client->vring_table.handler.map_handler = 0;
+    vhost_client->vring_table.handler.map_handler = NULL;
 
     for (idx = 0; idx < VHOST_CLIENT_VRING_NUM; idx++) {
         vhost_client->vring_table.vring[idx].kickfd = vhost_client->vring_table_shm[idx]->kickfd;
@@ -203,11 +209,13 @@ static int poll_client(void* context)
     VhostClient* vhost_client = (VhostClient*) context;
     uint32_t tx_idx = VHOST_CLIENT_VRING_IDX_TX;
 
+    LOG("%s: process_used_vring\n", __FUNCTION__);
     if (process_used_vring(&vhost_client->vring_table, tx_idx) != 0) {
         fprintf(stderr, "handle_used_vring failed.\n");
         return -1;
     }
 
+    LOG("%s: send_packet\n", __FUNCTION__);
     if (send_packet(vhost_client, (void*) VHOST_CLIENT_TEST_MESSAGE,
             VHOST_CLIENT_TEST_MESSAGE_LEN) != 0) {
         fprintf(stdout, "Send packet failed.\n");
