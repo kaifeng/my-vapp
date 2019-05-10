@@ -61,9 +61,6 @@ int vhost_user_send_fds(int fd, const VhostUserMsg *msg, int *fds,
         cmsg->cmsg_level = SOL_SOCKET;
         cmsg->cmsg_type = SCM_RIGHTS;
         memcpy(CMSG_DATA(cmsg), fds, fd_size);
-    } else {    // not required, already zeroed at L35.
-        msgh.msg_control = 0;
-        msgh.msg_controllen = 0;
     }
 
     do {
