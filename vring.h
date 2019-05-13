@@ -98,6 +98,7 @@ int set_host_vring(Client* client, struct vhost_vring *vring, int index);
 int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_num, Client* client);
 
 typedef struct {
+    // 可以放一些helper在这个结构里
     ProcessHandler handler;
     Vring vring[VHOST_CLIENT_VRING_NUM];
 } VringTable;

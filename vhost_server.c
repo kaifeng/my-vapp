@@ -320,6 +320,8 @@ static int _kick_server(FdNode* node)
     return 0;
 }
 
+// 在此决定使用中断还是轮询
+// server (slave) 监听kick
 static int _set_vring_kick(VhostServer* vhost_server, ServerMsg* msg)
 {
     fprintf(stdout, "%s\n", __FUNCTION__);
@@ -327,7 +329,7 @@ static int _set_vring_kick(VhostServer* vhost_server, ServerMsg* msg)
     int idx = msg->msg.u64 & VHOST_USER_VRING_IDX_MASK;
     int validfd = (msg->msg.u64 & VHOST_USER_VRING_NOFD_MASK) == 0;
 
-    assert(idx<VHOST_CLIENT_VRING_NUM);
+    assert(idx < VHOST_CLIENT_VRING_NUM);
     if (validfd) {
         assert(msg->fd_num == 1);
 
@@ -350,6 +352,14 @@ static int _set_vring_kick(VhostServer* vhost_server, ServerMsg* msg)
     return 0;
 }
 
+/* VHOST_USER_SET_VRING_CALL (13) Master payload: u64
+   Set the event file descriptor to signal when buffers are used. It
+   is passed in the ancillary data.
+   Bits (0-7) of the payload contain the vring index. Bit 8 is the
+   invalid FD flag. This flag is set when there is no file descriptor
+   in the ancillary data. This signals that polling will be used
+   instead of waiting for the call.
+*/
 static int _set_vring_call(VhostServer* vhost_server, ServerMsg* msg)
 {
     fprintf(stdout, "%s\n", __FUNCTION__);
@@ -357,7 +367,7 @@ static int _set_vring_call(VhostServer* vhost_server, ServerMsg* msg)
     int idx = msg->msg.u64 & VHOST_USER_VRING_IDX_MASK;
     int validfd = (msg->msg.u64 & VHOST_USER_VRING_NOFD_MASK) == 0;
 
-    assert(idx<VHOST_CLIENT_VRING_NUM);
+    assert(idx < VHOST_CLIENT_VRING_NUM);
     if (validfd) {
         assert(msg->fd_num == 1);
 
@@ -430,6 +440,9 @@ static int poll_server(void* context)
         LOG("%s: buffer_size %d\n", __FUNCTION__, vhost_server->buffer_size);
         if (vhost_server->buffer_size) {
             // send a packet from the buffer
+            /* 注意：server端发送数据时，将数据放在rx ring，而client端是放在tx ring
+               可见，tx/rx是针对client，也即master端来说的。
+             */
             put_vring(&vhost_server->vring_table, rx_idx,
                       vhost_server->buffer, vhost_server->buffer_size);
 
