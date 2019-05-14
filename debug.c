@@ -124,7 +124,7 @@ void dump_buffer(uint8_t* p, size_t len)
         if(i%16 == 0)fprintf(stdout,"\n");
         fprintf(stdout,"%.2x ",p[i]);
     }
-    fprintf(stdout, "......dump buffer end......\n");
+    fprintf(stdout, "\n......dump buffer end......\n");
 }
 
 // dump a vring struct

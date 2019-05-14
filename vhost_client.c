@@ -106,9 +106,9 @@ int init_vhost_client(VhostClient* vhost_client)
     }
 
     // VringTable initalization
-    vhost_client->vring_table.handler.context = (void*) vhost_client;
-    vhost_client->vring_table.handler.avail_handler = avail_handler_client;
-    vhost_client->vring_table.handler.map_handler = NULL;
+    vhost_client->vring_table.context = (void*) vhost_client;
+    vhost_client->vring_table.avail_handler = avail_handler_client;
+    vhost_client->vring_table.map_handler = NULL;
 
     for (idx = 0; idx < VHOST_CLIENT_VRING_NUM; idx++) {
         vhost_client->vring_table.vring[idx].kickfd = vhost_client->vring_table_shm[idx]->kickfd;

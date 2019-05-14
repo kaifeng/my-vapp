@@ -46,9 +46,9 @@ VhostServer* new_vhost_server(const char* path, int is_listen)
     vhost_server->memory.nregions = 0;
 
     // VringTable initalization
-    vhost_server->vring_table.handler.context = (void*) vhost_server;
-    vhost_server->vring_table.handler.avail_handler = avail_handler_server;
-    vhost_server->vring_table.handler.map_handler = map_handler;
+    vhost_server->vring_table.context = (void*) vhost_server;
+    vhost_server->vring_table.avail_handler = avail_handler_server;
+    vhost_server->vring_table.map_handler = map_handler;
 
     for (idx = 0; idx < VHOST_CLIENT_VRING_NUM; idx++) {
         vhost_server->vring_table.vring[idx].kickfd = -1;
@@ -348,7 +348,7 @@ static int _set_vring_kick(VhostServer* vhost_server, ServerMsg* msg)
         fprintf(stdout, "Got empty kickfd. Start polling.\n");
         vhost_server->is_polling = 1;
     }
-
+    LOG("%s: is_polling %d\n", __FUNCTION__, vhost_server->is_polling);
     return 0;
 }
 
@@ -432,7 +432,6 @@ static int poll_server(void* context)
 
     if (vhost_server->vring_table.vring[rx_idx].desc) {
         // process TX ring
-        LOG("%s: is_polling %d\n", __FUNCTION__, vhost_server->is_polling);
         if (vhost_server->is_polling) {
             _poll_avail_vring(vhost_server, tx_idx);
         }

@@ -137,7 +137,6 @@ int put_vring(VringTable* vring_table, uint32_t v_idx, void* buf, size_t size)
     struct vring_desc* desc = vring_table->vring[v_idx].desc;
     struct vring_avail* avail = vring_table->vring[v_idx].avail;
     unsigned int num = vring_table->vring[v_idx].num;
-    ProcessHandler* handler = &vring_table->handler;
 
     uint16_t a_idx = vring_table->vring[v_idx].last_avail_idx;
     void* dest_buf = 0;
@@ -153,8 +152,8 @@ int put_vring(VringTable* vring_table, uint32_t v_idx, void* buf, size_t size)
 
     // map the address
     // 如果有map_handler，做地址映射
-    if (handler && handler->map_handler) {
-        dest_buf = (void*)handler->map_handler(handler->context, desc[a_idx].addr);
+    if (vring_table->map_handler) {
+        dest_buf = (void*)vring_table->map_handler(vring_table->context, desc[a_idx].addr);
     } else {
         dest_buf = (void*) (uintptr_t) desc[a_idx].addr;
     }
@@ -238,7 +237,6 @@ static int _process_desc(VringTable* vring_table, uint32_t v_idx, uint32_t a_idx
     struct vring_avail* avail = vring_table->vring[v_idx].avail;
     struct vring_used* used = vring_table->vring[v_idx].used;
     unsigned int num = vring_table->vring[v_idx].num;
-    ProcessHandler* handler = &vring_table->handler;
     uint16_t u_idx = vring_table->vring[v_idx].last_used_idx % num;  // 处理完后更新用的
     uint16_t d_idx = avail->ring[a_idx];    // 要处理的desc的索引
     uint32_t i, len = 0;
@@ -259,8 +257,8 @@ static int _process_desc(VringTable* vring_table, uint32_t v_idx, uint32_t a_idx
         uint32_t cur_len = desc[i].len;
 
         // map the address
-        if (handler && handler->map_handler) {
-            cur = (void*)handler->map_handler(handler->context, desc[i].addr);
+        if (vring_table->map_handler) {
+            cur = (void*)vring_table->map_handler(vring_table->context, desc[i].addr);
         } else {
             cur = (void*) (uintptr_t) desc[i].addr;
         }
@@ -305,8 +303,8 @@ static int _process_desc(VringTable* vring_table, uint32_t v_idx, uint32_t a_idx
     }
 
     // consume the packet
-    if (handler && handler->avail_handler) {
-        if (handler->avail_handler(handler->context, buf + hdr_len, len - hdr_len) != 0) {
+    if (vring_table->avail_handler) {
+        if (vring_table->avail_handler(vring_table->context, buf + hdr_len, len - hdr_len) != 0) {
             // error handling current packet
             // TODO: we basically drop it here
         }

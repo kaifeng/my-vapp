@@ -68,12 +68,6 @@ typedef int (*avail_handler_t)(void* context, void* buf, size_t size);
 typedef uintptr_t (*map_handler_t)(void* context, uint64_t addr);
 
 typedef struct {
-    void* context;
-    avail_handler_t avail_handler;
-    map_handler_t map_handler;
-} ProcessHandler;
-
-typedef struct {
   int kickfd, callfd;
   struct vring_desc* desc;
   struct vring_avail* avail;
@@ -98,8 +92,10 @@ int set_host_vring(Client* client, struct vhost_vring *vring, int index);
 int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_num, Client* client);
 
 typedef struct {
-    // 可以放一些helper在这个结构里
-    ProcessHandler handler;
+    // context, handler由ProcessHandler移入
+    void* context;  // VhostClient or VhostServer instance
+    avail_handler_t avail_handler;  // avail_handler_client or avail_handler_server
+    map_handler_t map_handler;  // map_handler (server only)
     Vring vring[VHOST_CLIENT_VRING_NUM];
 } VringTable;
 
