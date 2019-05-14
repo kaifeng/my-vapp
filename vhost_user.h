@@ -68,7 +68,6 @@ typedef struct VhostUserMsg {
     };
 }  __attribute__((packed)) VhostUserMsg;
 
-#define MEMBER_SIZE(t,m)      (sizeof(((t*)0)->m))
 #define VHOST_USER_HDR_SIZE (MEMBER_SIZE(VhostUserMsg,request) \
                             + MEMBER_SIZE(VhostUserMsg,flags) \
                             + MEMBER_SIZE(VhostUserMsg,size))

@@ -419,6 +419,7 @@ static int in_msg_server(void* context, ServerMsg* msg)
     if (msg_handlers[msg->msg.request]) {
         result = msg_handlers[msg->msg.request](vhost_server, msg);
     }
+    fprintf(stdout, "Processing message: %s Done, result %d\n", cmd_from_vhost_request(msg->msg.request), result);
 
     return result;
 }

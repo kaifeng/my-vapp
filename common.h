@@ -32,6 +32,7 @@
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
+#define MEMBER_SIZE(t,m)      (sizeof(((t*)0)->m))
 
 #define DUMP_PACKETS
 

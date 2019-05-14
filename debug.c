@@ -53,6 +53,7 @@ const char* cmd_from_vhost_request(VhostUserRequest request)
 void dump_vhostmsg(const VhostUserMsg* msg)
 {
     int i = 0;
+    fprintf(stdout, "......dump vhost message start......\n");
     fprintf(stdout, "Cmd: %s (0x%x)\n", cmd_from_vhost_request(msg->request), msg->request);
     fprintf(stdout, "Flags: 0x%x\n", msg->flags);
 
@@ -111,21 +112,19 @@ void dump_vhostmsg(const VhostUserMsg* msg)
         break;
     }
 
-    fprintf(stdout,
-            "................................................................................\n");
+    fprintf(stdout, "......dump vhost message end......\n");
 }
 
 // dump a buffer in a hexdump way
 void dump_buffer(uint8_t* p, size_t len)
 {
     int i;
-    fprintf(stdout,
-            "................................................................................");
+    fprintf(stdout, "......dump buffer start......\n");
     for(i=0;i<len;i++) {
         if(i%16 == 0)fprintf(stdout,"\n");
         fprintf(stdout,"%.2x ",p[i]);
     }
-    fprintf(stdout,"\n");
+    fprintf(stdout, "......dump buffer end......\n");
 }
 
 // dump a vring struct
