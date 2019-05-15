@@ -24,7 +24,7 @@
 #define VHOST_CLIENT_PAGE_SIZE \
             ALIGN(sizeof(struct vhost_vring)+BUFFER_SIZE*VHOST_VRING_SIZE, ONEMEG)
 
-static int _kick_client(FdNode* node);
+static int _kick_client(struct fd_node* node);
 static int avail_handler_client(void* context, void* buf, size_t size);
 
 VhostClient* new_vhost_client(const char* path)
@@ -178,7 +178,7 @@ static int avail_handler_client(void* context, void* buf, size_t size)
     return 0;
 }
 
-static int _kick_client(FdNode* node)
+static int _kick_client(struct fd_node* node)
 {
     VhostClient* vhost_client = (VhostClient*) node->context;
     int kickfd = node->fd;

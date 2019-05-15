@@ -16,24 +16,22 @@
 
 #define FD_LIST_SIZE    10
 
-struct FdNodeStruct;
+struct fd_node;
 
-typedef int (*FdHandler)(struct FdNodeStruct* node);
+typedef int (*fd_handler_t)(struct fd_node* node);
 
-struct FdNodeStruct {
+struct fd_node {
     int fd;
     void* context;
-    FdHandler handler;
+    fd_handler_t handler;
 };
-
-typedef struct FdNodeStruct FdNode;
 
 typedef struct {
     size_t nfds;
     int fdmax;
-    FdNode  read_fds[FD_LIST_SIZE];
-    FdNode  write_fds[FD_LIST_SIZE];
-    uint32_t    ms;     // poll timeout value in ms
+    struct fd_node read_fds[FD_LIST_SIZE];
+    struct fd_node write_fds[FD_LIST_SIZE];
+    uint32_t ms;     // poll timeout value in ms
 } FdList;
 
 typedef enum {
@@ -44,7 +42,7 @@ typedef enum {
 #define FD_LIST_SELECT_5        (200)   // 5 times per sec
 
 int init_fd_list(FdList* fd_list, uint32_t ms);
-int add_fd_list(FdList* fd_list, FdType type, int fd, void* context, FdHandler handler);
+int add_fd_list(FdList* fd_list, FdType type, int fd, void* context, fd_handler_t handler);
 int del_fd_list(FdList* fd_list, FdType type, int fd);
 int traverse_fd_list(FdList* fd_list);
 

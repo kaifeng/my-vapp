@@ -29,8 +29,8 @@ typedef enum {
 
 } ServerSockStatus;
 
-static int receive_sock_server(FdNode* node);
-static int accept_sock_server(FdNode* node);
+static int receive_sock_server(struct fd_node* node);
+static int accept_sock_server(struct fd_node* node);
 
 /* alloc a new socket server struct, initialize state to INSTANCE_CREATED */
 Server* new_server(const char* path)
@@ -121,7 +121,7 @@ int end_server(Server* server)
 /* there is data coming in from socket
  * further logic continues at common.c vhost_user_recv_fds and vhost_user_send_fds
  */
-static int receive_sock_server(FdNode* node)
+static int receive_sock_server(struct fd_node* node)
 {
     Server* server = (Server*) node->context;
     int sock = node->fd;
@@ -182,7 +182,7 @@ static int receive_sock_server(FdNode* node)
 }
 
 /* Accept a connection and add the socket to the fd polling list */
-static int accept_sock_server(FdNode* node)
+static int accept_sock_server(struct fd_node* node)
 {
     int sock;
     struct sockaddr_un un;

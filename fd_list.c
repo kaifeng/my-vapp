@@ -14,7 +14,7 @@
 #include "common.h"
 #include "fd_list.h"
 
-static int reset_fd_node(FdNode* fd_node);
+static int reset_fd_node(struct fd_node* fd_node);
 
 int init_fd_list(FdList* fd_list, uint32_t ms)
 {
@@ -32,7 +32,7 @@ int init_fd_list(FdList* fd_list, uint32_t ms)
     return 0;
 }
 
-static int reset_fd_node(FdNode* fd_node)
+static int reset_fd_node(struct fd_node* fd_node)
 {
     fd_node->fd = -1;
     fd_node->context = 0;
@@ -41,7 +41,7 @@ static int reset_fd_node(FdNode* fd_node)
     return 0;
 }
 
-static FdNode* find_fd_node_by_fd(FdNode* fds, int fd)
+static struct fd_node* find_fd_node_by_fd(struct fd_node* fds, int fd)
 {
     int idx;
 
@@ -53,12 +53,11 @@ static FdNode* find_fd_node_by_fd(FdNode* fds, int fd)
     return 0;
 }
 
-/* find an unsed fdnode and add specified fd/context/handler to the list */
-int add_fd_list(FdList* fd_list, FdType type, int fd, void* context,
-        FdHandler handler)
+/* find an unsed fd_node and add specified fd/context/handler to the list */
+int add_fd_list(FdList* fd_list, FdType type, int fd, void* context, fd_handler_t handler)
 {
-    FdNode* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
-    FdNode* fd_node = find_fd_node_by_fd(fds, -1);
+    struct fd_node* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
+    struct fd_node* fd_node = find_fd_node_by_fd(fds, -1);
 
     if (!fd_node) {
         fprintf(stderr, "No space in fd list\n");
@@ -74,8 +73,8 @@ int add_fd_list(FdList* fd_list, FdType type, int fd, void* context,
 
 int del_fd_list(FdList* fd_list, FdType type, int fd)
 {
-    FdNode* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
-    FdNode* fd_node = find_fd_node_by_fd(fds, fd);
+    struct fd_node* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
+    struct fd_node* fd_node = find_fd_node_by_fd(fds, fd);
 
     if (!fd_node) {
         fprintf(stderr, "Fd (%d) not found fd list\n", fd);
@@ -90,7 +89,7 @@ int del_fd_list(FdList* fd_list, FdType type, int fd)
 static int fd_set_from_fd_list(FdList* fd_list, FdType type, fd_set* fdset)
 {
     int idx;
-    FdNode* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
+    struct fd_node* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
 
     FD_ZERO(fdset);
 
@@ -109,10 +108,10 @@ static int process_fd_set(FdList* fd_list, FdType type, fd_set* fdset)
 {
     int idx;
     int num_of_fds = 0;     // introduced fix
-    FdNode* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
+    struct fd_node* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
 
     for (idx = 0; idx < FD_LIST_SIZE; idx++) {
-        FdNode* node = &(fds[idx]);
+        struct fd_node* node = &(fds[idx]);
         if (FD_ISSET(node->fd,fdset)) {
             num_of_fds++;
             /* fd handler could be accept_sock_server (listen) or

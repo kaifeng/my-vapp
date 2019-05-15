@@ -287,7 +287,6 @@ static int _poll_avail_vring(VhostServer* vhost_server, int idx)
     if (vhost_server->vring_table.vring[idx].desc) {
         count = process_avail_vring(&vhost_server->vring_table, idx);
 #ifndef DUMP_PACKETS
-
         update_stat(&vhost_server->stat, count);
         print_stat(&vhost_server->stat);
 #endif
@@ -296,7 +295,7 @@ static int _poll_avail_vring(VhostServer* vhost_server, int idx)
     return count;
 }
 
-static int _kick_server(FdNode* node)
+static int _kick_server(struct fd_node* node)
 {
     VhostServer* vhost_server = (VhostServer*) node->context;
     int kickfd = node->fd;
@@ -437,8 +436,8 @@ static int poll_server(void* context)
         }
 
         // process RX ring
-        LOG("%s: buffer_size %d\n", __FUNCTION__, vhost_server->buffer_size);
         if (vhost_server->buffer_size) {
+            LOG("%s: buffer_size %d\n", __FUNCTION__, vhost_server->buffer_size);
             // send a packet from the buffer
             /* 注意：server端发送数据时，将数据放在rx ring，而client端是放在tx ring
                可见，tx/rx是针对client，也即master端来说的。

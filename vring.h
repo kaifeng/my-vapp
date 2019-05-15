@@ -57,6 +57,7 @@ struct vring_used {
   struct vring_used_elem ring[VHOST_VRING_SIZE];
 };
 
+// 位于该结构共享内存
 struct vhost_vring {
   int kickfd, callfd;
   struct vring_desc desc[VHOST_VRING_SIZE] __attribute__((aligned(4)));
@@ -72,7 +73,7 @@ typedef struct {
   struct vring_desc* desc;
   struct vring_avail* avail;
   struct vring_used* used;
-  unsigned int num;
+  unsigned int num;         // vring的大小，VHOST_VRING_SIZE
   uint16_t last_avail_idx;
   uint16_t last_used_idx;
 } Vring;
@@ -91,6 +92,7 @@ int set_host_vring(Client* client, struct vhost_vring *vring, int index);
 
 int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_num, Client* client);
 
+// client/server两端各自维护的一份结构，只有struct vhost_vring位于共享内存
 typedef struct {
     // context, handler由ProcessHandler移入
     void* context;  // VhostClient or VhostServer instance
