@@ -405,6 +405,7 @@ static MsgHandler msg_handlers[VHOST_USER_MAX] = {
         _set_vring_err,     // VHOST_USER_SET_VRING_ERR
         };
 
+// vhost server回调，处理vhost消息，由receive_sock_server调用
 static int in_msg_server(void* context, ServerMsg* msg)
 {
     VhostServer* vhost_server = (VhostServer*) context;
@@ -465,7 +466,7 @@ static AppHandlers vhost_server_handlers =
 
 int run_vhost_server(VhostServer* vhost_server)
 {
-    vhost_server_handlers.context = vhost_server;
+    vhost_server_handlers.context = vhost_server;   // 设置context
     set_handler_server(vhost_server->server, &vhost_server_handlers);
 
     start_stat(&vhost_server->stat);

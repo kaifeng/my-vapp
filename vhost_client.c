@@ -240,7 +240,7 @@ int run_vhost_client(VhostClient* vhost_client)
     if (init_vhost_client(vhost_client) != 0)
         return -1;
 
-    vhost_client_handlers.context = vhost_client;
+    vhost_client_handlers.context = vhost_client;   // 设置context
     set_handler_client(vhost_client->client, &vhost_client_handlers);
 
     start_stat(&vhost_client->stat);

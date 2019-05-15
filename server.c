@@ -140,9 +140,7 @@ static int receive_sock_server(struct fd_node* node)
         status = ServerSockDone;
         del_fd_list(&server->fd_list, FD_READ, sock);
         close(sock);
-    }
-
-    if (status == ServerSockAccept) {
+    } else {
 #ifdef DUMP_PACKETS
         dump_vhostmsg(&msg.msg);
 #endif
@@ -157,12 +155,6 @@ static int receive_sock_server(struct fd_node* node)
                         cmd_from_vhost_request(msg.msg.request));
                 status = ServerSockError;
             }
-        } else {
-            // ... or just dump it for debugging
-            dump_vhostmsg(&msg.msg);
-        }
-
-        if (status == ServerSockAccept) {
             // in_handler will tell us if we need to reply
             if (r > 0) {
                 /* Set the version in the flags when sending the reply */
@@ -175,6 +167,9 @@ static int receive_sock_server(struct fd_node* node)
                     status = ServerSockError;
                 }
             }
+        } else {
+            // ... or just dump it for debugging
+            dump_vhostmsg(&msg.msg);
         }
     }
 

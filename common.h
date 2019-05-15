@@ -43,8 +43,9 @@ struct ServerMsg;
 typedef int (*InMsgHandler)(void* context, struct ServerMsg* msg);
 typedef int (*PollHandler)(void* context);
 
+// 处理socket消息的回调
 typedef struct {
-    void* context;      // not used judging by code
+    void* context;      // vhost_server或vhost_client，传给handler使用
     InMsgHandler in_handler;
     PollHandler poll_handler;
 } AppHandlers;
