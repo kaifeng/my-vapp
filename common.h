@@ -43,8 +43,8 @@ struct ServerMsg;
 typedef int (*InMsgHandler)(void* context, struct ServerMsg* msg);
 typedef int (*PollHandler)(void* context);
 
-typedef struct AppHandlers {
-    void* context;
+typedef struct {
+    void* context;      // not used judging by code
     InMsgHandler in_handler;
     PollHandler poll_handler;
 } AppHandlers;
