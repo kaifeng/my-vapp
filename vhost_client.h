@@ -16,7 +16,7 @@
 #include "vring.h"
 #include "vhost_user.h"
 
-typedef struct VhostClient {
+typedef struct {
     Client* client;
     VhostUserMemory memory;
     uint64_t features;           // features negotiated with the server

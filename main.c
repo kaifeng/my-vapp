@@ -27,8 +27,8 @@ int main(int argc, char* argv[])
 {
     int opt = 0;
 
-    VhostClient *vhost_master = 0;
-    VhostServer *vhost_slave = 0;
+    VhostClient *vhost_master = NULL;
+    VhostServer *vhost_slave = NULL;
 
     atexit(cleanup);
     init_signals();

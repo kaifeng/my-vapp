@@ -258,6 +258,8 @@ static int _get_vring_base(VhostServer* vhost_server, ServerMsg* msg)
     return 1; // should reply back
 }
 
+// vring的_process_desc调用avail_handler，对server端就是该函数
+// 它把收到的数据拷到私有的buffer空间，后面poll_server得到buffer_size非零会打出报文
 static int avail_handler_server(void* context, void* buf, size_t size)
 {
     VhostServer* vhost_server = (VhostServer*) context;
@@ -388,22 +390,22 @@ static int _set_vring_err(VhostServer* vhost_server, ServerMsg* msg)
 // < 0 means error
 // TODO: move message handling to a separate module.
 static MsgHandler msg_handlers[VHOST_USER_MAX] = {
-        0,                  // VHOST_USER_NONE
-        _get_features,      // VHOST_USER_GET_FEATURES
-        _set_features,      // VHOST_USER_SET_FEATURES
-        _set_owner,         // VHOST_USER_SET_OWNER
-        _reset_owner,       // VHOST_USER_RESET_OWNER
-        _set_mem_table,     // VHOST_USER_SET_MEM_TABLE
-        _set_log_base,      // VHOST_USER_SET_LOG_BASE
-        _set_log_fd,        // VHOST_USER_SET_LOG_FD
-        _set_vring_num,     // VHOST_USER_SET_VRING_NUM
-        _set_vring_addr,    // VHOST_USER_SET_VRING_ADDR
-        _set_vring_base,    // VHOST_USER_SET_VRING_BASE
-        _get_vring_base,    // VHOST_USER_GET_VRING_BASE
-        _set_vring_kick,    // VHOST_USER_SET_VRING_KICK
-        _set_vring_call,    // VHOST_USER_SET_VRING_CALL
-        _set_vring_err,     // VHOST_USER_SET_VRING_ERR
-        };
+    0,                  // VHOST_USER_NONE
+    _get_features,      // VHOST_USER_GET_FEATURES
+    _set_features,      // VHOST_USER_SET_FEATURES
+    _set_owner,         // VHOST_USER_SET_OWNER
+    _reset_owner,       // VHOST_USER_RESET_OWNER
+    _set_mem_table,     // VHOST_USER_SET_MEM_TABLE
+    _set_log_base,      // VHOST_USER_SET_LOG_BASE
+    _set_log_fd,        // VHOST_USER_SET_LOG_FD
+    _set_vring_num,     // VHOST_USER_SET_VRING_NUM
+    _set_vring_addr,    // VHOST_USER_SET_VRING_ADDR
+    _set_vring_base,    // VHOST_USER_SET_VRING_BASE
+    _get_vring_base,    // VHOST_USER_GET_VRING_BASE
+    _set_vring_kick,    // VHOST_USER_SET_VRING_KICK
+    _set_vring_call,    // VHOST_USER_SET_VRING_CALL
+    _set_vring_err,     // VHOST_USER_SET_VRING_ERR
+};
 
 // vhost server回调，处理vhost消息，由receive_sock_server调用
 static int in_msg_server(void* context, ServerMsg* msg)

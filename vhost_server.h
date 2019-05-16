@@ -15,19 +15,19 @@
 #include "vring.h"
 #include "stat.h"
 
-typedef struct VhostServerMemoryRegion {
+typedef struct {
     uint64_t guest_phys_addr;
     uint64_t memory_size;
     uint64_t userspace_addr;
     uint64_t mmap_addr;
 } VhostServerMemoryRegion;
 
-typedef struct VhostServerMemory {
+typedef struct {
     uint32_t nregions;
     VhostServerMemoryRegion regions[VHOST_MEMORY_MAX_NREGIONS];
 } VhostServerMemory;
 
-typedef struct VhostServer {
+typedef struct {
     Server* server;
     VhostServerMemory memory;
     VringTable vring_table;

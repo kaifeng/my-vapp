@@ -150,7 +150,7 @@ int end_vhost_client(VhostClient* vhost_client)
 
     //TODO: should this be here?
     free(vhost_client->client);
-    vhost_client->client = 0;
+    vhost_client->client = NULL;
 
     return 0;
 }
