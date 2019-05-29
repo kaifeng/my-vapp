@@ -11,10 +11,12 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
+#include <limits.h>
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include "vhost_user.h"
+#include "fd_list.h"
 
 #define INSTANCE_CREATED        1
 #define INSTANCE_INITIALIZED    2
@@ -49,6 +51,18 @@ typedef struct {
     InMsgHandler in_handler;
     PollHandler poll_handler;
 } AppHandlers;
+
+/* struct for maintaining socket server */
+typedef struct {
+    char sock_path[PATH_MAX + 1];    // unix domain socket path
+    int status;
+    int sock;
+    FdList fd_list;
+    AppHandlers handlers;
+} UnSock;
+
+typedef UnSock Server;  // for backwards compatibility, to be removed
+typedef UnSock Client;  // for backwards compatibility, to be removed
 
 struct VhostUserMsg;
 enum VhostUserRequest;

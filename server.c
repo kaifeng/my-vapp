@@ -36,7 +36,7 @@ static int accept_sock_server(struct fd_node* node);
 Server* new_server(const char* path)
 {
     Server* server = (Server*) calloc(1, sizeof(Server));
-    strncpy(server->path, path ? path : VHOST_SOCK_NAME, PATH_MAX);
+    strncpy(server->sock_path, path ? path : VHOST_SOCK_NAME, PATH_MAX);
     server->status = INSTANCE_CREATED;
 
     return server;
@@ -60,12 +60,12 @@ int init_server(Server* server, int is_listen)
     }
 
     un.sun_family = AF_UNIX;
-    strcpy(un.sun_path, server->path);
+    strcpy(un.sun_path, server->sock_path);
 
-    len = sizeof(un.sun_family) + strlen(server->path);
+    len = sizeof(un.sun_family) + strlen(server->sock_path);
 
     if (is_listen) {
-        unlink(server->path); // remove if exists
+        unlink(server->sock_path); // remove if exists
 
         // Bind
         if (bind(server->sock, (struct sockaddr *) &un, len) == -1) {
@@ -108,7 +108,7 @@ int end_server(Server* server)
 
     // Close and unlink the socket
     close(server->sock);
-    unlink(server->path);
+    unlink(server->sock_path);
 
     server->status = INSTANCE_END;
 

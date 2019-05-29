@@ -16,14 +16,6 @@
 #include "common.h"
 #include "fd_list.h"
 
-typedef struct {
-    char sock_path[PATH_MAX];
-    int status;
-    int sock;
-    FdList fd_list;
-    AppHandlers handlers;
-} Client;
-
 enum VhostUserRequest;
 
 Client* new_client(const char* path);

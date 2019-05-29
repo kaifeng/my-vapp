@@ -25,15 +25,6 @@ struct ServerMsg {
 
 typedef struct ServerMsg ServerMsg;
 
-/* struct for maintaining socket server */
-typedef struct {
-    char path[PATH_MAX + 1];    // unix domain socket path
-    int status;
-    int sock;
-    FdList fd_list;
-    AppHandlers handlers;
-} Server;
-
 Server* new_server(const char* path);
 int set_handler_server(Server* server, AppHandlers* handlers);
 int init_server(Server* server, int is_listen);
