@@ -36,9 +36,6 @@ static int accept_sock_server(struct fd_node* node);
 Server* new_server(const char* path)
 {
     Server* server = (Server*) calloc(1, sizeof(Server));
-
-    //TODO: handle errors here
-
     strncpy(server->path, path ? path : VHOST_SOCK_NAME, PATH_MAX);
     server->status = INSTANCE_CREATED;
 

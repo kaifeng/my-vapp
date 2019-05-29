@@ -30,8 +30,6 @@ extern int app_running;
 Client* new_client(const char* path)
 {
     Client* client = (Client*) calloc(1, sizeof(Client));
-    //TODO: handle errors here
-
     strncpy(client->sock_path, path ? path : VHOST_SOCK_NAME, PATH_MAX);
     client->status = INSTANCE_CREATED;  // 作用不大，可以考虑去掉
 

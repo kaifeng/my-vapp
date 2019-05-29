@@ -79,7 +79,7 @@ int end_vhost_server(VhostServer* vhost_server)
 
     for (idx = 0; idx < vhost_server->memory.nregions; idx++) {
         VhostServerMemoryRegion *region = &vhost_server->memory.regions[idx];
-        end_shm(vhost_server->server->path,
+        end_shm(VHOST_SOCK_NAME, /* vhost_server->server->path,*/
                 (void*) (uintptr_t) region->userspace_addr,
                 region->memory_size, idx);
     }

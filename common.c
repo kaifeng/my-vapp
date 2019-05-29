@@ -137,14 +137,14 @@ int vhost_user_recv_fds(int fd, const VhostUserMsg *msg, int *fds,
 int shm_fds[VHOST_MEMORY_MAX_NREGIONS];
 
 /* 创建一个RW的共享内存 */
-void* init_shm(const char* path, size_t size, int idx)
+void* init_shm(const char* name_prefix, size_t size, int idx)
 {
     int fd = 0;
     void* result = 0;
     char path_idx[PATH_MAX];
     int oflags = 0;
 
-    sprintf(path_idx, "%s%d", path, idx);
+    sprintf(path_idx, "%s%d", name_prefix, idx);
 
     oflags = O_RDWR | O_CREAT;
 
@@ -184,7 +184,7 @@ void* map_shm_from_fd(int fd, size_t size) {
 }
 
 /* 取消共享内存映射并删除共享内存fd */
-int end_shm(const char* path, void* ptr, size_t size, int idx)
+int end_shm(const char* name_prefix, void* ptr, size_t size, int idx)
 {
     char path_idx[PATH_MAX];
 
@@ -199,8 +199,8 @@ int end_shm(const char* path, void* ptr, size_t size, int idx)
 
     // server can be null here, something wrong in the code flow.
     // unlink should only performed for who creates the shm.
-    if(path != NULL) {
-        sprintf(path_idx, "%s%d", path, idx);
+    if(name_prefix != NULL) {
+        sprintf(path_idx, "%s%d", name_prefix, idx);
         LOG("%s: remove shared memory %d, path %s\n", __FUNCTION__, idx, path_idx);
         if (shm_unlink(path_idx) != 0) {
             perror("shm_unlink");
