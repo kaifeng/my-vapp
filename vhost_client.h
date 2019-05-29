@@ -17,7 +17,7 @@
 #include "vhost_user.h"
 
 typedef struct {
-    Client* client;
+    UnSock* client;
     VhostUserMemory memory;
     uint64_t features;           // features negotiated with the server
 

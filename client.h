@@ -12,18 +12,16 @@
 #define CLIENT_H_
 
 #include <limits.h>
-
 #include "common.h"
 #include "fd_list.h"
+#include "unsock.h"
 
 enum VhostUserRequest;
 
-Client* new_client(const char* path);
-int init_client(Client* client);
-int end_client(Client* client);
-int set_handler_client(Client* client, AppHandlers* handlers);
-int loop_client(Client* client);
+int init_client(UnSock* client);
+int set_handler_client(UnSock* client, AppHandlers* handlers);
+int loop_client(UnSock* client);
 
-int vhost_ioctl(Client* client, enum VhostUserRequest request, ...);
+int vhost_ioctl(UnSock* client, enum VhostUserRequest request, ...);
 
 #endif /* CLIENT_H_ */

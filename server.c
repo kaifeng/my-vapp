@@ -32,26 +32,18 @@ typedef enum {
 static int receive_sock_server(struct fd_node* node);
 static int accept_sock_server(struct fd_node* node);
 
-/* alloc a new socket server struct, initialize state to INSTANCE_CREATED */
-Server* new_server(const char* path)
-{
-    Server* server = (Server*) calloc(1, sizeof(Server));
-    strncpy(server->sock_path, path ? path : VHOST_SOCK_NAME, PATH_MAX);
-    server->status = INSTANCE_CREATED;
-
-    return server;
-}
-
 /* initialize socket, start service or connect.
- * on sucess, server state -> INSTANCE_INITIALIZED
+ * on sucess, socket is connected
  */
-int init_server(Server* server, int is_listen)
+int init_server(UnSock* server, int is_listen)
 {
     struct sockaddr_un un;
     size_t len;
 
-    if (server->status != INSTANCE_CREATED)
+    if (server->sock_path == NULL) {
+        perror("server: sock path is empty");
         return 0;
+    }
 
     // Create the socket
     if ((server->sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
@@ -79,7 +71,6 @@ int init_server(Server* server, int is_listen)
             return -1;
         }
     } else {
-
         if (connect(server->sock, (struct sockaddr *) &un, len) == -1) {
             perror("connect");
             return -1;
@@ -95,22 +86,8 @@ int init_server(Server* server, int is_listen)
     add_fd_list(&server->fd_list, FD_READ, server->sock, (void*) server,
             is_listen?accept_sock_server:receive_sock_server);
 
-    server->status = INSTANCE_INITIALIZED;
-
-    return 0;
-}
-
-/* close socket, server state -> INSTANCE_END */
-int end_server(Server* server)
-{
-    if (server->status != INSTANCE_INITIALIZED)
-        return 0;
-
-    // Close and unlink the socket
-    close(server->sock);
-    unlink(server->sock_path);
-
-    server->status = INSTANCE_END;
+    server->is_connected = 1;
+    server->is_server = is_listen;
 
     return 0;
 }
@@ -120,7 +97,7 @@ int end_server(Server* server)
  */
 static int receive_sock_server(struct fd_node* node)
 {
-    Server* server = (Server*) node->context;
+    UnSock* server = (UnSock*) node->context;
     int sock = node->fd;
     ServerMsg msg;
     ServerSockStatus status = ServerSockAccept;
@@ -180,7 +157,7 @@ static int accept_sock_server(struct fd_node* node)
     struct sockaddr_un un;
     socklen_t len = sizeof(un);
     ServerSockStatus status = ServerSockInit;
-    Server* server = (Server*)node->context;
+    UnSock* server = (UnSock*)node->context;
 
     // Accept connection on the server socket
     if ((sock = accept(server->sock, (struct sockaddr *) &un, &len)) == -1) {
@@ -195,7 +172,7 @@ static int accept_sock_server(struct fd_node* node)
     return status;
 }
 
-int loop_server(Server* server)
+int loop_server(UnSock* server)
 {
     traverse_fd_list(&server->fd_list);
     if (server->handlers.poll_handler) {
@@ -205,7 +182,7 @@ int loop_server(Server* server)
     return 0;
 }
 
-int set_handler_server(Server* server, AppHandlers* handlers)
+int set_handler_server(UnSock* server, AppHandlers* handlers)
 {
     memcpy(&server->handlers, handlers, sizeof(AppHandlers));
 

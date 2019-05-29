@@ -23,27 +23,20 @@
 #include "client.h"
 #include "common.h"
 #include "vhost_user.h"
+#include "unsock.h"
 
 extern int app_running;
 
-/* 类似Server，创建一个Client实例 */
-Client* new_client(const char* path)
-{
-    Client* client = (Client*) calloc(1, sizeof(Client));
-    strncpy(client->sock_path, path ? path : VHOST_SOCK_NAME, PATH_MAX);
-    client->status = INSTANCE_CREATED;  // 作用不大，可以考虑去掉
-
-    return client;
-}
-
 /* 创建unix domain socket并连接到目的端，初始化fd list */
-int init_client(Client* client)
+int init_client(UnSock* client)
 {
     struct sockaddr_un un;
     size_t len;
 
-    if (client->status != INSTANCE_CREATED)
+    if (client->sock_path == NULL) {
+        perror("client: sock_path is empty");
         return 0;
+    }
 
     // Create the socket
     if ((client->sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
@@ -62,29 +55,16 @@ int init_client(Client* client)
         return -1;
     }
 
-    client->status = INSTANCE_INITIALIZED;
+    client->is_server = 0;
+    client->is_connected = 1;
 
     init_fd_list(&client->fd_list, FD_LIST_SELECT_POLL);
 
     return 0;
 }
 
-// 关闭socket连接
-int end_client(Client* client)
-{
-    if (client->status != INSTANCE_INITIALIZED)
-        return 0;
-
-    // Close the socket
-    close(client->sock);
-
-    client->status = INSTANCE_END;
-
-    return 0;
-}
-
 // 通过socket发送VhostUser消息
-int vhost_ioctl(Client* client, VhostUserRequest request, ...)
+int vhost_ioctl(UnSock* client, VhostUserRequest request, ...)
 {
     void *arg;
     va_list ap;
@@ -203,7 +183,7 @@ int vhost_ioctl(Client* client, VhostUserRequest request, ...)
     return 0;
 }
 
-int loop_client(Client* client)
+int loop_client(UnSock* client)
 {
     // externally modified
     app_running = 1;
@@ -221,7 +201,7 @@ int loop_client(Client* client)
     return 0;
 }
 
-int set_handler_client(Client* client, AppHandlers* handlers)
+int set_handler_client(UnSock* client, AppHandlers* handlers)
 {
     memcpy(&client->handlers,handlers, sizeof(AppHandlers));
 

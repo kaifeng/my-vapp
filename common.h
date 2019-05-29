@@ -18,10 +18,6 @@
 #include "vhost_user.h"
 #include "fd_list.h"
 
-#define INSTANCE_CREATED        1
-#define INSTANCE_INITIALIZED    2
-#define INSTANCE_END            3
-
 #define ONEMEG                  (1024*1024)
 
 #define ETH_PACKET_SIZE         (1518)
@@ -39,30 +35,6 @@
 #define DUMP_PACKETS
 
 #define LOG(fmt, ...)                printf(fmt, ##__VA_ARGS__)
-
-struct ServerMsg;
-
-typedef int (*InMsgHandler)(void* context, struct ServerMsg* msg);
-typedef int (*PollHandler)(void* context);
-
-// 处理socket消息的回调
-typedef struct {
-    void* context;      // vhost_server或vhost_client，传给handler使用
-    InMsgHandler in_handler;
-    PollHandler poll_handler;
-} AppHandlers;
-
-/* struct for maintaining socket server */
-typedef struct {
-    char sock_path[PATH_MAX + 1];    // unix domain socket path
-    int status;
-    int sock;
-    FdList fd_list;
-    AppHandlers handlers;
-} UnSock;
-
-typedef UnSock Server;  // for backwards compatibility, to be removed
-typedef UnSock Client;  // for backwards compatibility, to be removed
 
 struct VhostUserMsg;
 enum VhostUserRequest;

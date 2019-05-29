@@ -88,9 +88,9 @@ struct VhostUserMemory;
 int vring_table_from_memory_region(struct vhost_vring* vring_table[], size_t vring_table_num,
         struct VhostUserMemory *memory);
 
-int set_host_vring(Client* client, struct vhost_vring *vring, int index);
+int set_host_vring(UnSock* client, struct vhost_vring *vring, int index);
 
-int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_num, Client* client);
+int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_num, UnSock* client);
 
 // client/server两端各自维护的一份结构，只有struct vhost_vring位于共享内存
 typedef struct {

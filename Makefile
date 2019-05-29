@@ -1,9 +1,9 @@
-SOURCES=main.c common.c debug.c
+SOURCES=main.c common.c debug.c unsock.c
 SOURCES+=fd_list.c stat.c vring.c
 SOURCES+=server.c vhost_server.c
 SOURCES+=client.c vhost_client.c
 
-HEADERS=common.h
+HEADERS=common.h unsock.h
 HEADERS+=fd_list.h stat.h vring.h
 HEADERS+=server.h vhost_server.h
 HEADERS+=client.h vhost_client.h

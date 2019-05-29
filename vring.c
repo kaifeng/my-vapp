@@ -84,7 +84,7 @@ int vring_table_from_memory_region(struct vhost_vring* vring_table[], size_t vri
 }
 
 // 初化流程的一部分，设置vring
-int set_host_vring(Client* client, struct vhost_vring *vring, int index)
+int set_host_vring(UnSock* client, struct vhost_vring *vring, int index)
 {
     vring->kickfd = eventfd(0, EFD_NONBLOCK);
     vring->callfd = eventfd(0, EFD_NONBLOCK);
@@ -117,7 +117,7 @@ int set_host_vring(Client* client, struct vhost_vring *vring, int index)
 }
 
 int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_num,
-        Client* client)
+        UnSock* client)
 {
     int i = 0;
 

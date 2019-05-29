@@ -18,6 +18,7 @@
 #include "common.h"
 #include "stat.h"
 #include "vhost_client.h"
+#include "unsock.h"
 
 #define VHOST_CLIENT_TEST_MESSAGE        (arp_request)
 #define VHOST_CLIENT_TEST_MESSAGE_LEN    (sizeof(arp_request))
@@ -34,7 +35,7 @@ VhostClient* new_vhost_client(const char* path)
 
     //TODO: handle errors here
 
-    vhost_client->client = new_client(path);
+    vhost_client->client = new_unsock(path);
 
     vhost_client->page_size = VHOST_CLIENT_PAGE_SIZE;
 
@@ -146,7 +147,7 @@ int end_vhost_client(VhostClient* vhost_client)
                 vhost_client->memory.regions[i].memory_size, i);
     }
 
-    end_client(vhost_client->client);
+    close_unsock(vhost_client->client);
 
     //TODO: should this be here?
     free(vhost_client->client);

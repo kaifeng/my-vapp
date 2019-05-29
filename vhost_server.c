@@ -35,10 +35,10 @@ VhostServer* new_vhost_server(const char* path, int is_listen)
     //TODO: handle errors here
 
     /* alloc and init socket server */
-    vhost_server->server = new_server(path);
+    vhost_server->server = new_unsock(path);
     init_server(vhost_server->server, is_listen);
 
-    /* now INSTANCE_INITIALIZED */
+    // socket now connected
 
     /* code below cleans up all VhostServer fields
      * shoudn't codes below placed before the socket op?
@@ -73,7 +73,7 @@ int end_vhost_server(VhostServer* vhost_server)
     int idx;
 
     // End server
-    end_server(vhost_server->server);
+    close_unsock(vhost_server->server);
     free(vhost_server->server);
     vhost_server->server = 0;
 

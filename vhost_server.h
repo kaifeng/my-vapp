@@ -28,7 +28,7 @@ typedef struct {
 } VhostServerMemory;
 
 typedef struct {
-    Server* server;
+    UnSock* server;
     VhostServerMemory memory;
     VringTable vring_table;
 

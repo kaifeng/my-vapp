@@ -14,6 +14,7 @@
 #include <limits.h>
 
 #include "common.h"
+#include "unsock.h"
 #include "fd_list.h"
 #include "vhost_user.h"
 
@@ -25,10 +26,8 @@ struct ServerMsg {
 
 typedef struct ServerMsg ServerMsg;
 
-Server* new_server(const char* path);
-int set_handler_server(Server* server, AppHandlers* handlers);
-int init_server(Server* server, int is_listen);
-int loop_server(Server* server);
-int end_server(Server* server);
+int set_handler_server(UnSock* server, AppHandlers* handlers);
+int init_server(UnSock* server, int is_listen);
+int loop_server(UnSock* server);
 
 #endif /* SERVER_H_ */
