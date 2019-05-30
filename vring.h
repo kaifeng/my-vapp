@@ -11,7 +11,7 @@
 #ifndef VRING_H_
 #define VRING_H_
 
-#include "client.h"
+#include "common.h"
 
 // Number of vring structures used in Linux vhost. Max 32768.
 enum { VHOST_VRING_SIZE = 32*1024 };

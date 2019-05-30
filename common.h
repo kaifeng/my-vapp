@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include "vhost_user.h"
 #include "fd_list.h"
+#include "unsock.h"
 
 #define ONEMEG                  (1024*1024)
 
@@ -47,6 +48,8 @@ struct vring_avail;
 struct vring_used;
 struct vhost_vring;
 
+// vhost_user interface
+int vhost_ioctl(UnSock* client, enum VhostUserRequest request, ...);
 int vhost_user_send_fds(int fd, const struct VhostUserMsg *msg, int *fds, size_t fd_num);
 int vhost_user_recv_fds(int fd, const struct VhostUserMsg *msg, int *fds, size_t *fd_num);
 

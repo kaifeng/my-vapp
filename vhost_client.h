@@ -11,7 +11,7 @@
 #ifndef VHOST_CLIENT_H_
 #define VHOST_CLIENT_H_
 
-#include "client.h"
+#include "common.h"
 #include "stat.h"
 #include "vring.h"
 #include "vhost_user.h"
