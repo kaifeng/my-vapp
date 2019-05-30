@@ -25,7 +25,6 @@
 #include "vhost_user.h"
 #include "unsock.h"
 
-extern int app_running;
 
 // 通过socket发送VhostUser消息
 int vhost_ioctl(UnSock* client, VhostUserRequest request, ...)
@@ -143,24 +142,6 @@ int vhost_ioctl(UnSock* client, VhostUserRequest request, ...)
     }
 
     va_end(ap);
-
-    return 0;
-}
-
-int loop_client(UnSock* unsock)
-{
-    // externally modified
-    app_running = 1;
-
-    while (app_running) {
-        traverse_fd_list(&unsock->fd_list);
-        if (unsock->poll_handler) {
-            unsock->poll_handler(unsock->context);
-        }
-#ifdef DUMP_PACKETS
-        sleep(1);
-#endif
-    }
 
     return 0;
 }

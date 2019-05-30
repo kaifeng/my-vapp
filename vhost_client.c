@@ -229,6 +229,26 @@ static int poll_client(void* context)
     return 0;
 }
 
+extern int app_running;
+
+int loop_client(UnSock* unsock)
+{
+    // externally modified
+    app_running = 1;
+
+    while (app_running) {
+        traverse_fd_list(&unsock->fd_list);
+        if (unsock->poll_handler) {
+            unsock->poll_handler(unsock->context);
+        }
+#ifdef DUMP_PACKETS
+        sleep(1);
+#endif
+    }
+
+    return 0;
+}
+
 int run_vhost_client(VhostClient* vhost_client)
 {
     if (init_vhost_client(vhost_client) != 0)

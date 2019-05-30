@@ -18,8 +18,6 @@
 
 enum VhostUserRequest;
 
-int loop_client(UnSock* unsock);
-
 int vhost_ioctl(UnSock* client, enum VhostUserRequest request, ...);
 
 #endif /* CLIENT_H_ */
