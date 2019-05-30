@@ -19,7 +19,6 @@
 enum VhostUserRequest;
 
 int init_client(UnSock* client);
-int set_handler_client(UnSock* client, AppHandlers* handlers);
 int loop_client(UnSock* client);
 
 int vhost_ioctl(UnSock* client, enum VhostUserRequest request, ...);

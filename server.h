@@ -26,7 +26,6 @@ struct ServerMsg {
 
 typedef struct ServerMsg ServerMsg;
 
-int set_handler_server(UnSock* server, AppHandlers* handlers);
 int init_server(UnSock* server, int is_listen);
 int loop_server(UnSock* server);
 

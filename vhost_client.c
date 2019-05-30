@@ -229,20 +229,15 @@ static int poll_client(void* context)
     return 0;
 }
 
-static AppHandlers vhost_client_handlers =
-{
-        .context = NULL,
-        .in_handler = NULL,
-        .poll_handler = poll_client
-};
-
 int run_vhost_client(VhostClient* vhost_client)
 {
     if (init_vhost_client(vhost_client) != 0)
         return -1;
 
-    vhost_client_handlers.context = vhost_client;   // 设置context
-    set_handler_client(vhost_client->client, &vhost_client_handlers);
+    // 设置context和socket消息回调，client侧只设置了poll回调
+    vhost_client->client->context = vhost_client;
+    vhost_client->client->in_handler = NULL;
+    vhost_client->client->poll_handler = poll_client;
 
     start_stat(&vhost_client->stat);
     loop_client(vhost_client->client);

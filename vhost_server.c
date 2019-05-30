@@ -459,17 +459,12 @@ static int poll_server(void* context)
     return 0;
 }
 
-static AppHandlers vhost_server_handlers =
-{
-        .context = NULL,
-        .in_handler = in_msg_server,
-        .poll_handler = poll_server
-};
-
 int run_vhost_server(VhostServer* vhost_server)
 {
-    vhost_server_handlers.context = vhost_server;   // 设置context
-    set_handler_server(vhost_server->server, &vhost_server_handlers);
+    // 设置context和socket消息回调
+    vhost_server->server->context = vhost_server;
+    vhost_server->server->in_handler = in_msg_server;
+    vhost_server->server->poll_handler = poll_server;
 
     start_stat(&vhost_server->stat);
 

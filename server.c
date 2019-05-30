@@ -121,9 +121,9 @@ static int receive_sock_server(struct fd_node* node)
         r = 0;
         // Handle the packet to the registered server backend
         // see vhost_server in_msg_server()
-        if (server->handlers.in_handler) {
-            void* ctx = server->handlers.context;
-            r = server->handlers.in_handler(ctx, &msg);
+        if (server->in_handler) {
+            void* ctx = server->context;
+            r = server->in_handler(ctx, &msg);
             if (r < 0) {
                 fprintf(stderr, "Error processing message: %s\n",
                         cmd_from_vhost_request(msg.msg.request));
@@ -175,16 +175,9 @@ static int accept_sock_server(struct fd_node* node)
 int loop_server(UnSock* server)
 {
     traverse_fd_list(&server->fd_list);
-    if (server->handlers.poll_handler) {
-        server->handlers.poll_handler(server->handlers.context);
+    if (server->poll_handler) {
+        server->poll_handler(server->context);
     }
-
-    return 0;
-}
-
-int set_handler_server(UnSock* server, AppHandlers* handlers)
-{
-    memcpy(&server->handlers, handlers, sizeof(AppHandlers));
 
     return 0;
 }

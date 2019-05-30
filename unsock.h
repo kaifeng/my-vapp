@@ -23,7 +23,10 @@ typedef struct {
     int is_connected;  // socket是否已连接
     int is_server;  // 是否为server端，server端负责清理socket path
     FdList fd_list;
-    AppHandlers handlers;
+    // 处理socket消息的回调
+    void *context;  // vhost_server或vhost_client，传给handler使用
+    InMsgHandler in_handler;
+    PollHandler poll_handler;
 } UnSock;
 
 UnSock* new_unsock(const char* path);

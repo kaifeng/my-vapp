@@ -190,20 +190,13 @@ int loop_client(UnSock* client)
 
     while (app_running) {
         traverse_fd_list(&client->fd_list);
-        if (client->handlers.poll_handler) {
-            client->handlers.poll_handler(client->handlers.context);
+        if (client->poll_handler) {
+            client->poll_handler(client->context);
         }
 #ifdef DUMP_PACKETS
         sleep(1);
 #endif
     }
-
-    return 0;
-}
-
-int set_handler_client(UnSock* client, AppHandlers* handlers)
-{
-    memcpy(&client->handlers,handlers, sizeof(AppHandlers));
 
     return 0;
 }
