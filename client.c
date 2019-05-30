@@ -27,42 +27,6 @@
 
 extern int app_running;
 
-/* 创建unix domain socket并连接到目的端，初始化fd list */
-int init_client(UnSock* unsock)
-{
-    struct sockaddr_un un;
-    size_t len;
-
-    if (unsock->sock_path == NULL) {
-        perror("unsock: sock_path is empty");
-        return 0;
-    }
-
-    // Create the socket
-    if ((unsock->sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-        perror("socket");
-        return -1;
-    }
-
-    un.sun_family = AF_UNIX;
-    strcpy(un.sun_path, unsock->sock_path);
-
-    len = sizeof(un.sun_family) + strlen(unsock->sock_path);    // why not sizeof(un)?
-
-    // Connect
-    if (connect(unsock->sock, (struct sockaddr *) &un, len) == -1) {
-        perror("connect");
-        return -1;
-    }
-
-    unsock->is_server = 0;
-    unsock->is_connected = 1;
-
-    init_fd_list(&unsock->fd_list, FD_LIST_SELECT_POLL);
-
-    return 0;
-}
-
 // 通过socket发送VhostUser消息
 int vhost_ioctl(UnSock* client, VhostUserRequest request, ...)
 {

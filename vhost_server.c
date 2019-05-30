@@ -459,6 +459,16 @@ static int poll_server(void* context)
     return 0;
 }
 
+static int loop_server(UnSock* unsock)
+{
+    traverse_fd_list(&unsock->fd_list);
+    if (unsock->poll_handler) {
+        unsock->poll_handler(unsock->context);
+    }
+
+    return 0;
+}
+
 int run_vhost_server(VhostServer* vhost_server)
 {
     // 设置context和socket消息回调

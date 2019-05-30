@@ -2,7 +2,11 @@
 #define UNSOCK_H_
 
 #include <limits.h>
+
+#include "common.h"
+#include "unsock.h"
 #include "fd_list.h"
+#include "vhost_user.h"
 
 struct ServerMsg;
 
@@ -29,8 +33,17 @@ typedef struct {
     PollHandler poll_handler;
 } UnSock;
 
+struct ServerMsg {
+    struct VhostUserMsg msg;
+    size_t fd_num;
+    int fds[VHOST_MEMORY_MAX_NREGIONS];
+};
+
+typedef struct ServerMsg ServerMsg;
+
 UnSock* new_unsock(const char* path);
 int close_unsock(UnSock* s);
-
+int init_server(UnSock* unsock, int is_listen);
+int init_client(UnSock* unsock);
 
 #endif

@@ -11,7 +11,6 @@
 #ifndef VHOST_SERVER_H_
 #define VHOST_SERVER_H_
 
-#include "server.h"
 #include "vring.h"
 #include "stat.h"
 
