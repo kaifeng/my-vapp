@@ -21,14 +21,6 @@
 
 #include "server.h"
 
-typedef enum {
-    ServerSockInit,
-    ServerSockAccept,
-    ServerSockDone,
-    ServerSockError
-
-} ServerSockStatus;
-
 static int receive_sock_server(struct fd_node* node);
 static int accept_sock_server(struct fd_node* node);
 
@@ -100,7 +92,7 @@ static int receive_sock_server(struct fd_node* node)
     UnSock* server = (UnSock*) node->context;
     int sock = node->fd;
     ServerMsg msg;
-    ServerSockStatus status = ServerSockAccept;
+    int status = 0;
     int r;
 
     msg.fd_num = sizeof(msg.fds)/sizeof(int);
@@ -109,42 +101,46 @@ static int receive_sock_server(struct fd_node* node)
     r = vhost_user_recv_fds(sock, &msg.msg, msg.fds, &msg.fd_num);
     if (r < 0) {
         perror("recv");
-        status = ServerSockError;
-    } else if (r == 0) {
-        status = ServerSockDone;
+        return -1;
+    }
+    
+    if (r == 0) {
         del_fd_list(&server->fd_list, FD_READ, sock);
         close(sock);
-    } else {
+        LOG("connection closed");
+        return 0;
+    }
+
 #ifdef DUMP_PACKETS
-        dump_vhostmsg(&msg.msg);
+    dump_vhostmsg(&msg.msg);
 #endif
-        r = 0;
-        // Handle the packet to the registered server backend
-        // see vhost_server in_msg_server()
-        if (server->in_handler) {
-            void* ctx = server->context;
-            r = server->in_handler(ctx, &msg);
-            if (r < 0) {
-                fprintf(stderr, "Error processing message: %s\n",
-                        cmd_from_vhost_request(msg.msg.request));
-                status = ServerSockError;
-            }
-            // in_handler will tell us if we need to reply
-            if (r > 0) {
-                /* Set the version in the flags when sending the reply */
-                msg.msg.flags &= ~VHOST_USER_VERSION_MASK;
-                msg.msg.flags |= VHOST_USER_VERSION;
-                msg.msg.flags |= VHOST_USER_REPLY_MASK;
-                // Send data to the other side
-                if (vhost_user_send_fds(sock, &msg.msg, 0, 0) < 0) {
-                    perror("send");
-                    status = ServerSockError;
-                }
-            }
-        } else {
-            // ... or just dump it for debugging
-            dump_vhostmsg(&msg.msg);
+    r = 0;
+    // Handle the packet to the registered server backend
+    // see vhost_server in_msg_server()
+    if (server->in_handler) {
+        void* ctx = server->context;
+        r = server->in_handler(ctx, &msg);
+        if (r < 0) {
+            fprintf(stderr, "Error processing message: %s\n",
+                    cmd_from_vhost_request(msg.msg.request));
+            status = -1;
         }
+        // in_handler will tell us if we need to reply
+        if (r > 0) {
+            /* Set the version in the flags when sending the reply */
+            msg.msg.flags &= ~VHOST_USER_VERSION_MASK;
+            msg.msg.flags |= VHOST_USER_VERSION;
+            msg.msg.flags |= VHOST_USER_REPLY_MASK;
+            // Send data to the other side
+            if (vhost_user_send_fds(sock, &msg.msg, 0, 0) < 0) {
+                perror("send");
+                status = -1;
+            }
+        }
+    } else {
+        LOG("No available recv handler, message not processed.\n");
+        // ... or just dump it for debugging
+        dump_vhostmsg(&msg.msg);
     }
 
     return status;
@@ -156,20 +152,18 @@ static int accept_sock_server(struct fd_node* node)
     int sock;
     struct sockaddr_un un;
     socklen_t len = sizeof(un);
-    ServerSockStatus status = ServerSockInit;
     UnSock* server = (UnSock*)node->context;
 
     // Accept connection on the server socket
     if ((sock = accept(server->sock, (struct sockaddr *) &un, &len)) == -1) {
-        perror("accept");
-    } else {
-        status = ServerSockAccept;
+        perror("accept connection");
+        return -1;
     }
 
     add_fd_list(&server->fd_list, FD_READ, sock, (void*) server, receive_sock_server);
 
     // this return value is discarded by process_fd_set
-    return status;
+    return 0;
 }
 
 int loop_server(UnSock* unsock)
