@@ -28,37 +28,37 @@
 extern int app_running;
 
 /* 创建unix domain socket并连接到目的端，初始化fd list */
-int init_client(UnSock* client)
+int init_client(UnSock* unsock)
 {
     struct sockaddr_un un;
     size_t len;
 
-    if (client->sock_path == NULL) {
-        perror("client: sock_path is empty");
+    if (unsock->sock_path == NULL) {
+        perror("unsock: sock_path is empty");
         return 0;
     }
 
     // Create the socket
-    if ((client->sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    if ((unsock->sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         perror("socket");
         return -1;
     }
 
     un.sun_family = AF_UNIX;
-    strcpy(un.sun_path, client->sock_path);
+    strcpy(un.sun_path, unsock->sock_path);
 
-    len = sizeof(un.sun_family) + strlen(client->sock_path);    // why not sizeof(un)?
+    len = sizeof(un.sun_family) + strlen(unsock->sock_path);    // why not sizeof(un)?
 
     // Connect
-    if (connect(client->sock, (struct sockaddr *) &un, len) == -1) {
+    if (connect(unsock->sock, (struct sockaddr *) &un, len) == -1) {
         perror("connect");
         return -1;
     }
 
-    client->is_server = 0;
-    client->is_connected = 1;
+    unsock->is_server = 0;
+    unsock->is_connected = 1;
 
-    init_fd_list(&client->fd_list, FD_LIST_SELECT_POLL);
+    init_fd_list(&unsock->fd_list, FD_LIST_SELECT_POLL);
 
     return 0;
 }
@@ -183,15 +183,15 @@ int vhost_ioctl(UnSock* client, VhostUserRequest request, ...)
     return 0;
 }
 
-int loop_client(UnSock* client)
+int loop_client(UnSock* unsock)
 {
     // externally modified
     app_running = 1;
 
     while (app_running) {
-        traverse_fd_list(&client->fd_list);
-        if (client->poll_handler) {
-            client->poll_handler(client->context);
+        traverse_fd_list(&unsock->fd_list);
+        if (unsock->poll_handler) {
+            unsock->poll_handler(unsock->context);
         }
 #ifdef DUMP_PACKETS
         sleep(1);

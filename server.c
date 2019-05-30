@@ -35,59 +35,59 @@ static int accept_sock_server(struct fd_node* node);
 /* initialize socket, start service or connect.
  * on sucess, socket is connected
  */
-int init_server(UnSock* server, int is_listen)
+int init_server(UnSock* unsock, int is_listen)
 {
     struct sockaddr_un un;
     size_t len;
 
-    if (server->sock_path == NULL) {
+    if (unsock->sock_path == NULL) {
         perror("server: sock path is empty");
         return 0;
     }
 
     // Create the socket
-    if ((server->sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    if ((unsock->sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         perror("socket");
         return -1;
     }
 
     un.sun_family = AF_UNIX;
-    strcpy(un.sun_path, server->sock_path);
+    strcpy(un.sun_path, unsock->sock_path);
 
-    len = sizeof(un.sun_family) + strlen(server->sock_path);
+    len = sizeof(un.sun_family) + strlen(unsock->sock_path);
 
     if (is_listen) {
-        unlink(server->sock_path); // remove if exists
+        unlink(unsock->sock_path); // remove if exists
 
         // Bind
-        if (bind(server->sock, (struct sockaddr *) &un, len) == -1) {
+        if (bind(unsock->sock, (struct sockaddr *) &un, len) == -1) {
             perror("bind");
             return -1;
         }
 
         // Listen
-        if (listen(server->sock, 1) == -1) {
+        if (listen(unsock->sock, 1) == -1) {
             perror("listen");
             return -1;
         }
     } else {
-        if (connect(server->sock, (struct sockaddr *) &un, len) == -1) {
+        if (connect(unsock->sock, (struct sockaddr *) &un, len) == -1) {
             perror("connect");
             return -1;
         }
     }
 
     /* init a fd_list struct, reset all fds and handler */
-    init_fd_list(&server->fd_list, FD_LIST_SELECT_5);
+    init_fd_list(&unsock->fd_list, FD_LIST_SELECT_5);
     /* pick an unused fd node (fd = -1) and add sock as well as handler to it.
      * if the server is listening, read means a connection is coming in,
      * otherwise, it means a buffer is comming in.
      */
-    add_fd_list(&server->fd_list, FD_READ, server->sock, (void*) server,
+    add_fd_list(&unsock->fd_list, FD_READ, unsock->sock, (void*) unsock,
             is_listen?accept_sock_server:receive_sock_server);
 
-    server->is_connected = 1;
-    server->is_server = is_listen;
+    unsock->is_connected = 1;
+    unsock->is_server = is_listen;
 
     return 0;
 }
@@ -172,11 +172,11 @@ static int accept_sock_server(struct fd_node* node)
     return status;
 }
 
-int loop_server(UnSock* server)
+int loop_server(UnSock* unsock)
 {
-    traverse_fd_list(&server->fd_list);
-    if (server->poll_handler) {
-        server->poll_handler(server->context);
+    traverse_fd_list(&unsock->fd_list);
+    if (unsock->poll_handler) {
+        unsock->poll_handler(unsock->context);
     }
 
     return 0;

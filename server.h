@@ -26,7 +26,7 @@ struct ServerMsg {
 
 typedef struct ServerMsg ServerMsg;
 
-int init_server(UnSock* server, int is_listen);
-int loop_server(UnSock* server);
+int init_server(UnSock* unsock, int is_listen);
+int loop_server(UnSock* unsock);
 
 #endif /* SERVER_H_ */
