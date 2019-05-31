@@ -19,6 +19,7 @@
 
 #include "vring.h"
 #include "common.h"
+#include "shm.h"
 #include "vhost_user.h"
 
 #define VRING_IDX_NONE          ((uint16_t)-1)
@@ -264,7 +265,7 @@ static int _process_desc(VringTable* vring_table, uint32_t v_idx, uint32_t a_idx
         }
 
         if (len + cur_len < ETH_PACKET_SIZE) {
-            memcpy(buf + len, cur, cur_len);
+            memcpy(buf + len, cur, cur_len);    // server不退出，client退出再次启动与server通信时，这里异常，似乎与地址对齐有关。
 #ifdef DUMP_PACKETS
             fprintf(stdout, "%d ", cur_len);
 #endif

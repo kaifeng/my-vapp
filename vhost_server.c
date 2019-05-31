@@ -16,6 +16,7 @@
 
 #include "fd_list.h"
 #include "common.h"
+#include "shm.h"
 #include "vhost_server.h"
 #include "vring.h"
 

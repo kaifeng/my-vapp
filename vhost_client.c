@@ -16,6 +16,7 @@
 
 #include "packet.h"
 #include "common.h"
+#include "shm.h"
 #include "stat.h"
 #include "vhost_client.h"
 #include "unsock.h"

@@ -155,7 +155,7 @@ static int receive_sock_server(struct fd_node* node)
     if (r == 0) {
         del_fd_list(&server->fd_list, FD_READ, sock);
         close(sock);
-        LOG("connection closed");
+        LOG("connection closed\n");
         return 0;
     }
 
