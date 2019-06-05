@@ -80,9 +80,8 @@ int end_vhost_server(VhostServer* vhost_server)
 
     for (idx = 0; idx < vhost_server->memory.nregions; idx++) {
         VhostServerMemoryRegion *region = &vhost_server->memory.regions[idx];
-        end_shm(VHOST_SOCK_NAME, /* vhost_server->server->path,*/
-                (void*) (uintptr_t) region->userspace_addr,
-                region->memory_size, idx);
+        // shm由client端分配，不要在server端调end_shm
+        unmap_shm((void*) (uintptr_t) region->userspace_addr, region->memory_size);
     }
 
     return 0;
@@ -172,6 +171,9 @@ static int _set_mem_table(VhostServer* vhost_server, ServerMsg* msg)
 
             region->mmap_addr =
                     (uintptr_t) map_shm(msg->fds[idx], region->memory_size);
+            if(region->mmap_addr == 0) {
+                LOG("%s: failed to map shared memory\n", __FUNCTION__);
+            }
             region->mmap_addr += msg->msg.memory.regions[idx].mmap_offset;
 
             vhost_server->memory.nregions++;

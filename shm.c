@@ -24,14 +24,15 @@
 int shm_fds[VHOST_MEMORY_MAX_NREGIONS];
 
 /* 创建一个RW的共享内存 */
-void* create_shm(const char* name_prefix, size_t size, int idx)
+// 创建的fd在/dev/shm
+void* create_shm(size_t size, int idx)
 {
     int fd = 0;
     void* result = 0;
     char name[PATH_MAX];
     int oflags = 0;
 
-    sprintf(name, "%s%d", name_prefix, idx);
+    sprintf(name, "%s%d", SHM_NAME_PREFIX, idx);
 
     oflags = O_RDWR | O_CREAT;
 
@@ -62,7 +63,7 @@ err:
 
 /* 映身共享内存 */
 void* map_shm(int fd, size_t size) {
-    void *result = mmap(0, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    void *result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (result == MAP_FAILED) {
         perror("mmap");
         result = 0;
@@ -70,8 +71,17 @@ void* map_shm(int fd, size_t size) {
     return result;
 }
 
+// server端unmap共享内存
+int unmap_shm(void* ptr, size_t size) {
+    if (munmap(ptr, size) != 0) {
+        perror("munmap");
+        return -1;
+    }
+    return 0;
+}
+
 /* 取消共享内存映射并删除共享内存fd */
-int end_shm(const char* name_prefix, void* ptr, size_t size, int idx)
+int end_shm(void* ptr, size_t size, int idx)
 {
     char name[PATH_MAX];
 
@@ -87,13 +97,11 @@ int end_shm(const char* name_prefix, void* ptr, size_t size, int idx)
 
     // server can be null here, something wrong in the code flow.
     // unlink should only performed for who creates the shm.
-    if(name_prefix != NULL) {
-        sprintf(name, "%s%d", name_prefix, idx);
-        LOG("%s: remove shared memory %d, name %s\n", __FUNCTION__, idx, name);
-        if (shm_unlink(name) != 0) {
-            perror("shm_unlink");
-            return -1;
-        }
+    sprintf(name, "%s%d", SHM_NAME_PREFIX, idx);
+    LOG("%s: remove shared memory %d, name %s\n", __FUNCTION__, idx, name);
+    if (shm_unlink(name) != 0) {
+        perror("shm_unlink");
+        return -1;
     }
 
     return 0;

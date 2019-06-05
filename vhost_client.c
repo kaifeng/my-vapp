@@ -43,7 +43,7 @@ VhostClient* new_vhost_client(const char* path)
     // Create and attach shm to memory regions
     vhost_client->memory.nregions = VHOST_CLIENT_VRING_NUM;
     for (idx = 0; idx < vhost_client->memory.nregions; idx++) {
-        void* shm = create_shm(VHOST_SOCK_NAME, vhost_client->page_size, idx);
+        void* shm = create_shm(vhost_client->page_size, idx);
         if (!shm) {
             fprintf(stderr, "Creatig shm %d failed\n", idx);
             free(vhost_client->client);
@@ -140,11 +140,7 @@ int end_vhost_client(VhostClient* vhost_client)
     // free all shared memory mappings
     for (i = 0; i<vhost_client->memory.nregions; i++)
     {
-        // Seems wrong, sock_path is from cmdline,
-        // but shm is created via VHOST_SOCK_NAME in init_vhost_client
-        // see unlinked files in /dev/shm
-        end_shm(VHOST_SOCK_NAME /* vhost_client->client->sock_path */,
-                (void*) (uintptr_t) vhost_client->memory.regions[i].guest_phys_addr,
+        end_shm((void*) (uintptr_t) vhost_client->memory.regions[i].guest_phys_addr,
                 vhost_client->memory.regions[i].memory_size, i);
     }
 
