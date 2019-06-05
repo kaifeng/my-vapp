@@ -434,6 +434,8 @@ static int poll_server(void* context)
     VhostServer* vhost_server = (VhostServer*) context;
     int tx_idx = VHOST_CLIENT_VRING_IDX_TX;
     int rx_idx = VHOST_CLIENT_VRING_IDX_RX;
+    
+    LOG("%s\n", __FUNCTION__);
 
     if (vhost_server->vring_table.vring[rx_idx].desc) {
         // process TX ring
@@ -464,6 +466,8 @@ static int poll_server(void* context)
 
 static int loop_server(UnSock* unsock)
 {
+    LOG("%s\n", __FUNCTION__);
+    
     traverse_fd_list(&unsock->fd_list);
     if (unsock->poll_handler) {
         unsock->poll_handler(unsock->context);

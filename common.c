@@ -52,6 +52,8 @@ int vhost_user_send_fds(int fd, const VhostUserMsg *msg, int *fds,
     char control[CMSG_SPACE(fd_size)];
     struct cmsghdr *cmsg;       // ancillary data for this socket.
 
+    LOG("%s\n", __FUNCTION__);
+
     memset(&msgh, 0, sizeof(msgh));
     memset(control, 0, sizeof(control));
 
@@ -98,6 +100,8 @@ int vhost_user_recv_fds(int fd, const VhostUserMsg *msg, int *fds,
     size_t fd_size = (*fd_num) * sizeof(int);
     char control[CMSG_SPACE(fd_size)];
     struct cmsghdr *cmsg;
+
+    LOG("%s\n", __FUNCTION__);
 
     memset(&msgh, 0, sizeof(msgh));
     memset(control, 0, sizeof(control));

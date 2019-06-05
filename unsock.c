@@ -144,6 +144,8 @@ static int receive_sock_server(struct fd_node* node)
     int status = 0;
     int r;
 
+    LOG("%s: enter\n", __FUNCTION__);
+
     msg.fd_num = sizeof(msg.fds)/sizeof(int);
 
     // Receive data from the other side
@@ -167,8 +169,10 @@ static int receive_sock_server(struct fd_node* node)
     // Handle the packet to the registered server backend
     // see vhost_server in_msg_server()
     if (unsock->in_handler) {
+        LOG("%s: processing\n", __FUNCTION__);
         void* ctx = unsock->context;
         r = unsock->in_handler(ctx, &msg);
+        LOG("%s: in_handler = %d\n", __FUNCTION__, r);
         if (r < 0) {
             fprintf(stderr, "Error processing message: %s\n",
                     cmd_from_vhost_request(msg.msg.request));
@@ -191,6 +195,8 @@ static int receive_sock_server(struct fd_node* node)
         // ... or just dump it for debugging
         dump_vhostmsg(&msg.msg);
     }
+
+    LOG("%s: status = %d\n", __FUNCTION__, status);
 
     return status;
 }
