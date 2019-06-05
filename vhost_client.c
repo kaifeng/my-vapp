@@ -43,7 +43,7 @@ VhostClient* new_vhost_client(const char* path)
     // Create and attach shm to memory regions
     vhost_client->memory.nregions = VHOST_CLIENT_VRING_NUM;
     for (idx = 0; idx < vhost_client->memory.nregions; idx++) {
-        void* shm = init_shm(VHOST_SOCK_NAME, vhost_client->page_size, idx);
+        void* shm = create_shm(VHOST_SOCK_NAME, vhost_client->page_size, idx);
         if (!shm) {
             fprintf(stderr, "Creatig shm %d failed\n", idx);
             free(vhost_client->client);

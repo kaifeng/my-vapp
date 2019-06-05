@@ -10,6 +10,9 @@
 #include "common.h"
 #include "unsock.h"
 
+static int receive_sock_server(struct fd_node* node);
+static int accept_sock_server(struct fd_node* node);
+
 /* alloc a new socket struct, initialize state to INSTANCE_CREATED */
 UnSock* new_unsock(const char* path)
 {
@@ -41,7 +44,7 @@ int init_client(UnSock* unsock)
 
     if (unsock->sock_path == NULL) {
         perror("unsock: sock_path is empty");
-        return 0;
+        return -1;
     }
 
     // Create the socket
@@ -69,9 +72,6 @@ int init_client(UnSock* unsock)
     return 0;
 }
 
-static int receive_sock_server(struct fd_node* node);
-static int accept_sock_server(struct fd_node* node);
-
 /* initialize socket, start service or connect.
  * on sucess, socket is connected
  */
@@ -82,7 +82,7 @@ int init_server(UnSock* unsock, int is_listen)
 
     if (unsock->sock_path == NULL) {
         perror("server: sock path is empty");
-        return 0;
+        return -1;
     }
 
     // Create the socket
@@ -118,12 +118,13 @@ int init_server(UnSock* unsock, int is_listen)
     }
 
     /* init a fd_list struct, reset all fds and handler */
-    init_fd_list(&unsock->fd_list, FD_LIST_SELECT_5);
+    init_fd_list(&unsock->fd_list, FD_LIST_SELECT_5);   // server和client的poll时间设置为何不同？
     /* pick an unused fd node (fd = -1) and add sock as well as handler to it.
      * if the server is listening, read means a connection is coming in,
      * otherwise, it means a buffer is comming in.
      */
-    add_fd_list(&unsock->fd_list, FD_READ, unsock->sock, (void*) unsock,
+    // 为何不监听时也要加入fd list？
+    add_fd_list(&unsock->fd_list, FD_READ, unsock->sock, (void*)unsock,
             is_listen?accept_sock_server:receive_sock_server);
 
     unsock->is_connected = 1;
@@ -137,7 +138,7 @@ int init_server(UnSock* unsock, int is_listen)
  */
 static int receive_sock_server(struct fd_node* node)
 {
-    UnSock* server = (UnSock*) node->context;
+    UnSock* unsock = (UnSock*) node->context;
     int sock = node->fd;
     ServerMsg msg;
     int status = 0;
@@ -153,7 +154,7 @@ static int receive_sock_server(struct fd_node* node)
     }
     
     if (r == 0) {
-        del_fd_list(&server->fd_list, FD_READ, sock);
+        del_fd_list(&unsock->fd_list, FD_READ, sock);
         close(sock);
         LOG("connection closed\n");
         return 0;
@@ -165,9 +166,9 @@ static int receive_sock_server(struct fd_node* node)
     r = 0;
     // Handle the packet to the registered server backend
     // see vhost_server in_msg_server()
-    if (server->in_handler) {
-        void* ctx = server->context;
-        r = server->in_handler(ctx, &msg);
+    if (unsock->in_handler) {
+        void* ctx = unsock->context;
+        r = unsock->in_handler(ctx, &msg);
         if (r < 0) {
             fprintf(stderr, "Error processing message: %s\n",
                     cmd_from_vhost_request(msg.msg.request));
@@ -200,15 +201,15 @@ static int accept_sock_server(struct fd_node* node)
     int sock;
     struct sockaddr_un un;
     socklen_t len = sizeof(un);
-    UnSock* server = (UnSock*)node->context;
+    UnSock* unsock = (UnSock*)node->context;
 
     // Accept connection on the server socket
-    if ((sock = accept(server->sock, (struct sockaddr *) &un, &len)) == -1) {
+    if ((sock = accept(unsock->sock, (struct sockaddr *) &un, &len)) == -1) {
         perror("accept connection");
         return -1;
     }
 
-    add_fd_list(&server->fd_list, FD_READ, sock, (void*) server, receive_sock_server);
+    add_fd_list(&unsock->fd_list, FD_READ, sock, (void*)unsock, receive_sock_server);
 
     // this return value is discarded by process_fd_set
     return 0;

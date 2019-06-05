@@ -35,8 +35,8 @@ int init_fd_list(FdList* fd_list, uint32_t ms)
 static int reset_fd_node(struct fd_node* fd_node)
 {
     fd_node->fd = -1;
-    fd_node->context = 0;
-    fd_node->handler = 0;
+    fd_node->context = NULL;
+    fd_node->handler = NULL;
 
     return 0;
 }
@@ -60,7 +60,7 @@ int add_fd_list(FdList* fd_list, FdType type, int fd, void* context, fd_handler_
     struct fd_node* fd_node = find_fd_node_by_fd(fds, -1);
 
     if (!fd_node) {
-        fprintf(stderr, "No space in fd list\n");
+        perror("No space in fd list");
         return -1;
     }
 
