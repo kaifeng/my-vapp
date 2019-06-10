@@ -14,13 +14,18 @@
 #include "common.h"
 #include "fd_list.h"
 
-static int reset_fd_node(struct fd_node* fd_node);
+static int reset_fd_node(struct fd_node* fd_node)
+{
+    fd_node->fd = -1;
+    fd_node->context = NULL;
+    fd_node->handler = NULL;
+
+    return 0;
+}
 
 int init_fd_list(FdList* fd_list, uint32_t ms)
 {
     int idx;
-    fd_list->nfds = 0;
-    fd_list->fdmax = -1;
 
     for (idx = 0; idx < FD_LIST_SIZE; idx++) {
         reset_fd_node(&(fd_list->read_fds[idx]));
@@ -32,32 +37,24 @@ int init_fd_list(FdList* fd_list, uint32_t ms)
     return 0;
 }
 
-static int reset_fd_node(struct fd_node* fd_node)
-{
-    fd_node->fd = -1;
-    fd_node->context = NULL;
-    fd_node->handler = NULL;
-
-    return 0;
-}
-
-static struct fd_node* find_fd_node_by_fd(struct fd_node* fds, int fd)
+static struct fd_node* find_fd_node(struct fd_node* fds, int fd)
 {
     int idx;
 
     for (idx = 0; idx < FD_LIST_SIZE; idx++) {
-        if (fds[idx].fd == fd)
+        if (fds[idx].fd == fd) {
             return &(fds[idx]);
+        }
     }
 
-    return 0;
+    return NULL;
 }
 
 /* find an unsed fd_node and add specified fd/context/handler to the list */
 int add_fd_list(FdList* fd_list, FdType type, int fd, void* context, fd_handler_t handler)
 {
     struct fd_node* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
-    struct fd_node* fd_node = find_fd_node_by_fd(fds, -1);
+    struct fd_node* fd_node = find_fd_node(fds, -1);
 
     if (!fd_node) {
         perror("No space in fd list");
@@ -74,7 +71,7 @@ int add_fd_list(FdList* fd_list, FdType type, int fd, void* context, fd_handler_
 int del_fd_list(FdList* fd_list, FdType type, int fd)
 {
     struct fd_node* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
-    struct fd_node* fd_node = find_fd_node_by_fd(fds, fd);
+    struct fd_node* fd_node = find_fd_node(fds, fd);
 
     if (!fd_node) {
         fprintf(stderr, "Fd (%d) not found fd list\n", fd);
@@ -86,24 +83,36 @@ int del_fd_list(FdList* fd_list, FdType type, int fd)
     return 0;
 }
 
-static int fd_set_from_fd_list(FdList* fd_list, FdType type, fd_set* fdset)
+/* 生成一个文件描述符集合，宏由C库函数提供，
+   集合包括目前有效的文件描述符（非-1），
+   fdmax是现有集合里文件描述符的最大值。
+   返回值：集合内fd最大值
+*/
+static int get_fd_set(FdList* fd_list, FdType type, fd_set* fdset)
 {
     int idx;
     struct fd_node* fds = (type == FD_READ) ? fd_list->read_fds : fd_list->write_fds;
 
     FD_ZERO(fdset);
 
+    int fdmax = -1;
     for (idx = 0; idx < FD_LIST_SIZE; idx++) {
         int fd = fds[idx].fd;
         if (fd != -1) {
-            FD_SET(fd,fdset);
-            fd_list->fdmax = MAX(fd, fd_list->fdmax);
+            FD_SET(fd, fdset);
+            fdmax = MAX(fd, fdmax);
         }
     }
 
-    return 0;
+    return fdmax;
 }
 
+/* 针对fd集合，调用回调函数，handler为下列一种：
+   _kick_client
+   _kick_server
+   accept_sock_server
+   receive_sock_server
+*/
 static int process_fd_set(FdList* fd_list, FdType type, fd_set* fdset)
 {
     int idx;
@@ -114,8 +123,6 @@ static int process_fd_set(FdList* fd_list, FdType type, fd_set* fdset)
         struct fd_node* node = &(fds[idx]);
         if (FD_ISSET(node->fd,fdset)) {
             num_of_fds++;
-            /* fd handler could be accept_sock_server (listen) or
-               receive_sock_server (connect) */
             if (node->handler) {
                 node->handler(node);
             }
@@ -133,11 +140,12 @@ int traverse_fd_list(FdList* fd_list)
                           .tv_usec = (fd_list->ms%1000)*1000 };
     int r;
 
-    fd_list->fdmax = -1;
-    fd_set_from_fd_list(fd_list, FD_READ, &read_fdset);
-    fd_set_from_fd_list(fd_list, FD_WRITE, &write_fdset);
-
-    r = select(fd_list->fdmax + 1, &read_fdset, &write_fdset, 0, &tv);
+    int rfd_max = get_fd_set(fd_list, FD_READ, &read_fdset);
+    int wfd_max = get_fd_set(fd_list, FD_WRITE, &write_fdset);
+    // man: nfds should be set to the highest-numbered file descriptor in any of the three sets, plus 1.
+    int nfds = MAX(rfd_max, wfd_max) + 1;
+    
+    r = select(nfds, &read_fdset, &write_fdset, 0, &tv);
 
     if (r == -1) {
         perror("select");

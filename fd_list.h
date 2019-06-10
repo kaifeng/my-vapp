@@ -27,10 +27,8 @@ struct fd_node {
 };
 
 typedef struct {
-    size_t nfds;
-    int fdmax;
     struct fd_node read_fds[FD_LIST_SIZE];
-    struct fd_node write_fds[FD_LIST_SIZE];
+    struct fd_node write_fds[FD_LIST_SIZE];     // 似乎没有使用
     uint32_t ms;     // poll timeout value in ms
 } FdList;
 
