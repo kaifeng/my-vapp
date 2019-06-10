@@ -47,6 +47,7 @@ void* create_shm(size_t size, int idx)
         goto err;
     }
 
+    // 按man的说明，映射后fd其实可以关闭
     result = map_shm(fd, size);
     if (!result) {
         goto err;
@@ -95,8 +96,6 @@ int end_shm(void* ptr, size_t size, int idx)
         return -1;
     }
 
-    // server can be null here, something wrong in the code flow.
-    // unlink should only performed for who creates the shm.
     sprintf(name, "%s%d", SHM_NAME_PREFIX, idx);
     LOG("%s: remove shared memory %d, name %s\n", __FUNCTION__, idx, name);
     if (shm_unlink(name) != 0) {

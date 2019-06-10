@@ -34,6 +34,7 @@ typedef struct {
     uint32_t ms;     // poll timeout value in ms
 } FdList;
 
+// FD_WRITE并未使用
 typedef enum {
     FD_READ, FD_WRITE
 } FdType;

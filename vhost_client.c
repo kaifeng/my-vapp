@@ -34,10 +34,7 @@ VhostClient* new_vhost_client(const char* path)
     VhostClient* vhost_client = (VhostClient*) calloc(1, sizeof(VhostClient));
     int idx = 0;
 
-    //TODO: handle errors here
-
     vhost_client->client = new_unsock(path);
-
     vhost_client->page_size = VHOST_CLIENT_PAGE_SIZE;
 
     // Create and attach shm to memory regions
@@ -45,7 +42,7 @@ VhostClient* new_vhost_client(const char* path)
     for (idx = 0; idx < vhost_client->memory.nregions; idx++) {
         void* shm = create_shm(vhost_client->page_size, idx);
         if (!shm) {
-            fprintf(stderr, "Creatig shm %d failed\n", idx);
+            fprintf(stderr, "Creating shm %d failed\n", idx);
             free(vhost_client->client);
             free(vhost_client);
             return 0;

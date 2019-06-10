@@ -13,7 +13,7 @@
 static int receive_sock_server(struct fd_node* node);
 static int accept_sock_server(struct fd_node* node);
 
-/* alloc a new socket struct, initialize state to INSTANCE_CREATED */
+/* alloc a new socket struct */
 UnSock* new_unsock(const char* path)
 {
     UnSock* s = (UnSock*) calloc(1, sizeof(UnSock));
