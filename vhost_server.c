@@ -36,8 +36,8 @@ VhostServer* new_vhost_server(const char* path, int is_listen)
     //TODO: handle errors here
 
     /* alloc and init socket server */
-    vhost_server->server = new_unsock(path);
-    init_server(vhost_server->server, is_listen);
+    vhost_server->unsock = new_unsock(path);
+    init_server(vhost_server->unsock, is_listen);
 
     // socket now connected
 
@@ -74,9 +74,9 @@ int end_vhost_server(VhostServer* vhost_server)
     int idx;
 
     // End server
-    close_unsock(vhost_server->server);
-    free(vhost_server->server);
-    vhost_server->server = 0;
+    close_unsock(vhost_server->unsock);
+    free(vhost_server->unsock);
+    vhost_server->unsock = NULL;
 
     for (idx = 0; idx < vhost_server->memory.nregions; idx++) {
         VhostServerMemoryRegion *region = &vhost_server->memory.regions[idx];
@@ -313,7 +313,7 @@ static int _kick_server(struct fd_node* node)
         perror("recv kick");
     } else if (r == 0) {
         fprintf(stdout, "Kick fd closed\n");
-        del_fd_list(&vhost_server->server->fd_list, FD_READ, kickfd);
+        del_fd_list(&vhost_server->unsock->fd_list, FD_READ, kickfd);
     } else {
 #if 0
         fprintf(stdout, "Got kick %"PRId64"\n", kick_it);
@@ -342,7 +342,7 @@ static int _set_vring_kick(VhostServer* vhost_server, ServerMsg* msg)
         fprintf(stdout, "Got kickfd 0x%x\n", vhost_server->vring_table.vring[idx].kickfd);
 
         if (idx == VHOST_CLIENT_VRING_IDX_TX) {
-            add_fd_list(&vhost_server->server->fd_list, FD_READ,
+            add_fd_list(&vhost_server->unsock->fd_list, FD_READ,
                     vhost_server->vring_table.vring[idx].kickfd,
                     (void*) vhost_server, _kick_server);
             fprintf(stdout, "Listening for kicks on 0x%x\n", vhost_server->vring_table.vring[idx].kickfd);
@@ -480,15 +480,15 @@ static int loop_server(UnSock* unsock)
 int run_vhost_server(VhostServer* vhost_server)
 {
     // 设置context和socket消息回调
-    vhost_server->server->context = vhost_server;
-    vhost_server->server->in_handler = in_msg_server;
-    vhost_server->server->poll_handler = poll_server;
+    vhost_server->unsock->context = vhost_server;
+    vhost_server->unsock->in_handler = in_msg_server;
+    vhost_server->unsock->poll_handler = poll_server;
 
     start_stat(&vhost_server->stat);
 
     app_running = 1; // externally modified
     while (app_running) {
-        loop_server(vhost_server->server);
+        loop_server(vhost_server->unsock);
     }
 
     stop_stat(&vhost_server->stat);
