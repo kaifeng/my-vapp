@@ -466,9 +466,10 @@ static int poll_server(void* context)
 
 static int loop_server(UnSock* unsock)
 {
-    LOG("%s\n", __FUNCTION__);
-    
-    traverse_fd_list(&unsock->fd_list);
+    // 查询socket是否有消息
+    int n = traverse_fd_list(&unsock->fd_list);
+    LOG("%s: fd count %d\n", __FUNCTION__, n);
+    // 查询vring是否有数据
     if (unsock->poll_handler) {
         unsock->poll_handler(unsock->context);
     }

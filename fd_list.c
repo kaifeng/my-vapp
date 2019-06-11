@@ -162,5 +162,5 @@ int traverse_fd_list(FdList* fd_list)
         }
     }
 
-    return 0;
+    return r;
 }

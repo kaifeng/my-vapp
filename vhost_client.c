@@ -231,7 +231,10 @@ int loop_client(UnSock* unsock)
     app_running = 1;
 
     while (app_running) {
-        traverse_fd_list(&unsock->fd_list);
+        // 查询socket是否有数据
+        int n = traverse_fd_list(&unsock->fd_list);
+        LOG("%s: fd count %d\n", __FUNCTION__, n);
+        // 查询vring是否有数据
         if (unsock->poll_handler) {
             unsock->poll_handler(unsock->context);
         }
