@@ -33,11 +33,11 @@ VhostServer* new_vhost_server(const char* path, int is_listen)
     VhostServer* vhost_server = (VhostServer*) calloc(1, sizeof(VhostServer));
     int idx;
 
-    //TODO: handle errors here
-
     /* alloc and init socket server */
     vhost_server->unsock = new_unsock(path);
-    init_server(vhost_server->unsock, is_listen);
+    // server和client的poll时间设置为何不同？
+    init_unsock(vhost_server->unsock, is_listen, FD_LIST_SELECT_5,
+                is_listen?accept_sock_server:receive_sock_server);
 
     // socket now connected
 

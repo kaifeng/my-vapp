@@ -39,6 +39,7 @@ typedef enum {
 
 #define FD_LIST_SELECT_POLL     (0)     // poll and exit
 #define FD_LIST_SELECT_5        (200)   // 5 times per sec
+#define FD_LIST_SELECT_2        (500)   // 2 times per sec
 
 int init_fd_list(FdList* fd_list, uint32_t ms);
 int add_fd_list(FdList* fd_list, FdType type, int fd, void* context, fd_handler_t handler);

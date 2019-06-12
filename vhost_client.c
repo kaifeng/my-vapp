@@ -67,12 +67,14 @@ int init_vhost_client(VhostClient* vhost_client)
 {
     int idx;
 
-    if (!vhost_client->unsock)
+    if (!vhost_client->unsock) {
         return -1;
+    }
 
     // 初始化socket client并建立连接
-    if (init_client(vhost_client->unsock) != 0)
+    if (init_unsock(vhost_client->unsock, 0, FD_LIST_SELECT_POLL, NULL) != 0) {
         return -1;
+    }
 
     /* VHOST_USER_SET_OWNER (3)
        Issued when a new connection is established. It sets the current Master

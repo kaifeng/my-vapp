@@ -23,6 +23,7 @@ static int reset_fd_node(struct fd_node* fd_node)
     return 0;
 }
 
+/* init a fd_list struct, reset all fds and handler */
 int init_fd_list(FdList* fd_list, uint32_t ms)
 {
     int idx;
