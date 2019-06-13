@@ -73,6 +73,7 @@ struct vhost_vring* new_vring(void* vring_base)
     return vring;
 }
 
+// TODO 不属于vring，提取到vhost-user
 // 初化流程的一部分，设置vring
 int set_host_vring(UnSock* client, struct vhost_vring *vring, int index)
 {
@@ -106,6 +107,7 @@ int set_host_vring(UnSock* client, struct vhost_vring *vring, int index)
     return 0;
 }
 
+// TODO 不属于vring，提取到vhost-user
 int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_num,
         UnSock* client)
 {
