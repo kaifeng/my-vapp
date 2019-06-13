@@ -253,7 +253,7 @@ int run_vhost_client(VhostClient* vhost_client)
     if (init_vhost_client(vhost_client) != 0)
         return -1;
 
-    // 设置context和socket消息回调，client侧只设置了poll回调
+    // 设置context和socket消息回调，client侧只设置了poll回调，也即不收socket消息
     vhost_client->unsock->context = vhost_client;
     vhost_client->unsock->in_handler = NULL;
     vhost_client->unsock->poll_handler = poll_client;
