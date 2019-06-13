@@ -101,6 +101,7 @@ typedef struct {
     Vring vring[VHOST_CLIENT_VRING_NUM];
 } VringTable;
 
+int init_vring(VringTable *vring_table, uint32_t v_idx);
 int put_vring(VringTable* vring_table, uint32_t v_idx, void* buf, size_t size);
 int process_used_vring(VringTable* vring_table, uint32_t v_idx);
 int process_avail_vring(VringTable* vring_table, uint32_t v_idx);

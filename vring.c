@@ -24,6 +24,20 @@
 
 #define VRING_IDX_NONE          ((uint16_t)-1)
 
+// 初始化vring结构体
+int init_vring(VringTable *vring_table, uint32_t v_idx)
+{
+    vring_table->vring[v_idx].kickfd = -1;
+    vring_table->vring[v_idx].callfd = -1;
+    vring_table->vring[v_idx].desc = NULL;
+    vring_table->vring[v_idx].avail = NULL;
+    vring_table->vring[v_idx].used = NULL;
+    vring_table->vring[v_idx].num = 0;
+    vring_table->vring[v_idx].last_avail_idx = 0;
+    vring_table->vring[v_idx].last_used_idx = 0;
+    return 0;
+}
+
 /* Initialize a vhost_vring structure from the provided base
    address of shared memory. */
 static struct vhost_vring* new_vring(void* vring_base)

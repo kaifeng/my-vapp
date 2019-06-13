@@ -52,14 +52,7 @@ VhostServer* new_vhost_server(const char* path, int is_listen)
     vhost_server->vring_table.map_handler = map_handler;
 
     for (idx = 0; idx < VHOST_CLIENT_VRING_NUM; idx++) {
-        vhost_server->vring_table.vring[idx].kickfd = -1;
-        vhost_server->vring_table.vring[idx].callfd = -1;
-        vhost_server->vring_table.vring[idx].desc = 0;
-        vhost_server->vring_table.vring[idx].avail = 0;
-        vhost_server->vring_table.vring[idx].used = 0;
-        vhost_server->vring_table.vring[idx].num = 0;
-        vhost_server->vring_table.vring[idx].last_avail_idx = 0;
-        vhost_server->vring_table.vring[idx].last_used_idx = 0;
+        init_vring(&vhost_server->vring_table, idx);
     }
 
     vhost_server->buffer_size = 0;
