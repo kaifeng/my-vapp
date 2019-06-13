@@ -134,6 +134,7 @@ static int _set_features(VhostServer* vhost_server, ServerMsg* msg)
 
 static int _set_owner(VhostServer* vhost_server, ServerMsg* msg)
 {
+    // 是否需要清理VringTable的旧数据？
     fprintf(stdout, "%s\n", __FUNCTION__);
     return 0;
 }

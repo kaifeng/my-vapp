@@ -85,9 +85,6 @@ struct VhostUserMemory;
 #define VHOST_CLIENT_VRING_NUM      2
 
 
-int vring_table_from_memory_region(struct vhost_vring* vring_table[], size_t vring_table_num,
-        struct VhostUserMemory *memory);
-
 int set_host_vring(UnSock* client, struct vhost_vring *vring, int index);
 
 int set_host_vring_table(struct vhost_vring* vring_table[], size_t vring_table_num, UnSock* client);
@@ -101,6 +98,7 @@ typedef struct {
     Vring vring[VHOST_CLIENT_VRING_NUM];
 } VringTable;
 
+struct vhost_vring* new_vring(void* vring_base);
 int init_vring(VringTable *vring_table, uint32_t v_idx);
 int put_vring(VringTable* vring_table, uint32_t v_idx, void* buf, size_t size);
 int process_used_vring(VringTable* vring_table, uint32_t v_idx);

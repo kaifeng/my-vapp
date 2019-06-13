@@ -40,7 +40,7 @@ int init_vring(VringTable *vring_table, uint32_t v_idx)
 
 /* Initialize a vhost_vring structure from the provided base
    address of shared memory. */
-static struct vhost_vring* new_vring(void* vring_base)
+struct vhost_vring* new_vring(void* vring_base)
 {
     struct vhost_vring* vring = (struct vhost_vring*) vring_base;
     int i = 0;
@@ -71,31 +71,6 @@ static struct vhost_vring* new_vring(void* vring_base)
     sync_shm(vring_base, initialized_size);
 
     return vring;
-}
-
-// 在指定的共享内存位置初始化vring_table
-int vring_table_from_memory_region(struct vhost_vring* vring_table[], size_t vring_table_num,
-        VhostUserMemory *memory)
-{
-    int i = 0;
-
-    /* TODO: here we assume we're putting each vring in a separate
-     * memory region from the memory map.
-     * In reality this probably is not like that
-     */
-    assert(vring_table_num == memory->nregions);
-
-    for (i = 0; i < vring_table_num; i++) {
-        struct vhost_vring* vring = new_vring(
-                (void*) (uintptr_t) memory->regions[i].guest_phys_addr);
-        if (!vring) {
-            fprintf(stderr, "Unable to create vring %d.\n", i);
-            return -1;
-        }
-        vring_table[i] = vring;
-    }
-
-    return 0;
 }
 
 // 初化流程的一部分，设置vring

@@ -29,15 +29,17 @@
 static int _kick_client(struct fd_node* node);
 static int avail_handler_client(void* context, void* buf, size_t size);
 
+
 VhostClient* new_vhost_client(const char* path)
 {
     VhostClient* vhost_client = (VhostClient*) calloc(1, sizeof(VhostClient));
     int idx = 0;
 
+    // create unsock and connect
     vhost_client->unsock = new_unsock(path);
+    
+    // 创建共享内存regions，数量与VRING数量相同
     vhost_client->page_size = VHOST_CLIENT_PAGE_SIZE;
-
-    // Create and attach shm to memory regions
     vhost_client->memory.nregions = VHOST_CLIENT_VRING_NUM;
     for (idx = 0; idx < vhost_client->memory.nregions; idx++) {
         void* shm = create_shm(vhost_client->page_size, idx);
@@ -45,7 +47,7 @@ VhostClient* new_vhost_client(const char* path)
             fprintf(stderr, "Creating shm %d failed\n", idx);
             free(vhost_client->unsock);
             free(vhost_client);
-            return 0;
+            return NULL;
         }
         vhost_client->memory.regions[idx].guest_phys_addr = (uintptr_t) shm;
         vhost_client->memory.regions[idx].memory_size = vhost_client->page_size;
@@ -53,10 +55,18 @@ VhostClient* new_vhost_client(const char* path)
         vhost_client->memory.regions[idx].mmap_offset = 0;
     }
 
-    // init vrings on the shm (through memory regions)
-    if (vring_table_from_memory_region(vhost_client->vring_table_shm, VHOST_CLIENT_VRING_NUM,
-            &vhost_client->memory) != 0) {
-        perror("init vring_table from memory region");
+    // 在memory初始化vring结构，并把指针赋给vring_table_shm，vring_table_shm会作为MEM_TABLE发给对端。
+    /* TODO: here we assume we're putting each vring in a separate
+     * memory region from the memory map.
+     * In reality this probably is not like that
+     */
+    for (idx = 0; idx < VHOST_CLIENT_VRING_NUM; idx++) {
+        struct vhost_vring* vring = new_vring((void*)(uintptr_t)vhost_client->memory.regions[idx].guest_phys_addr);
+        if (!vring) {
+            fprintf(stderr, "Unable to create vring from memory region %d.\n", idx);
+            return NULL;
+        }
+        vhost_client->vring_table_shm[idx] = vring;
     }
 
     return vhost_client;
