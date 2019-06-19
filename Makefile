@@ -19,19 +19,20 @@ CFLAGS += -Wall -Werror -Iinclude -I.
 CFLAGS += -ggdb3 -O0
 LFLAGS = -lrt
 
-SRC_VHOST_SERVER = ${SRC_COMMON} vhost_server.c run_server.c
-SRC_VHOST_CLIENT = ${SRC_COMMON} vhost_client.c run_client.c
+SRC_VHOST_SERVER = ${SRC_COMMON} vhost_server.c
+SRC_VHOST_CLIENT = ${SRC_COMMON} vhost_client.c
 
-all: vhost run_server run_client
+all: vhost_server vhost_client
 
+# target not used
 vhost: ${SOURCES} ${HEADERS}
 		${CC} ${CFLAGS} ${SOURCES} -o $@ ${LFLAGS}
 
-run_server: ${SRC_VHOST_SERVER} ${HEADERS}
+vhost_server: ${SRC_VHOST_SERVER} ${HEADERS}
 		${CC} ${CFLAGS} ${SRC_VHOST_SERVER} -o $@ ${LFLAGS}
 
-run_client: ${SRC_VHOST_CLIENT} ${HEADERS}
+vhost_client: ${SRC_VHOST_CLIENT} ${HEADERS}
 		${CC} ${CFLAGS} ${SRC_VHOST_CLIENT} -o $@ ${LFLAGS}
 
 clean:
-		rm -rf vhost run_server run_client
+		rm -rf vhost vhost_server vhost_client

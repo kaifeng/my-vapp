@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 #include <unistd.h>
 
 #include "packet.h"
@@ -20,6 +21,7 @@
 #include "stat.h"
 #include "vhost_client.h"
 #include "unsock.h"
+
 
 #define VHOST_CLIENT_TEST_MESSAGE        (arp_request)
 #define VHOST_CLIENT_TEST_MESSAGE_LEN    (sizeof(arp_request))
@@ -73,6 +75,7 @@ VhostClient* new_vhost_client(const char* path)
 }
 
 // client的初始化流程，与server的消息交互在此
+// 把vring发给server，并初始化自身的VringTable结构
 int init_vhost_client(VhostClient* vhost_client)
 {
     int idx;
@@ -275,4 +278,56 @@ int run_vhost_client(VhostClient* vhost_client)
     end_vhost_client(vhost_client);
 
     return 0;
+}
+
+/* CODES FOR RUNNING VHOST CLIENT */
+
+static struct sigaction sigact;
+int app_running = 0;
+
+static void signal_handler(int);
+static void init_signals(void);
+static void cleanup(void);
+
+int main(int argc, char* argv[])
+{
+    VhostClient *vhost_master = NULL;
+
+    atexit(cleanup);
+    init_signals();
+
+    char *path = argc == 2 ? argv[1] : NULL;
+
+    /* vhost-user client, can be qemu */
+    vhost_master = new_vhost_client(path);
+    run_vhost_client(vhost_master);
+    free(vhost_master);
+
+    return EXIT_SUCCESS;
+
+}
+
+static void signal_handler(int sig){
+    switch(sig)
+    {
+    case SIGINT:
+    case SIGKILL:
+    case SIGTERM:
+        app_running = 0;
+        break;
+    default:
+        break;
+    }
+}
+
+static void init_signals(void){
+    sigact.sa_handler = signal_handler;
+    sigemptyset(&sigact.sa_mask);
+    sigact.sa_flags = 0;
+    sigaction(SIGINT, &sigact, (struct sigaction *)NULL);
+}
+
+static void cleanup(void){
+    sigemptyset(&sigact.sa_mask);
+    app_running = 0;
 }
