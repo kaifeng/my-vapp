@@ -19,14 +19,18 @@ CFLAGS += -Wall -Werror -Iinclude -I.
 CFLAGS += -ggdb3 -O0
 LFLAGS = -lrt
 
-SRC_VHOST_SERVER = ${SRC_COMMON} vhost_server.c
-SRC_VHOST_CLIENT = ${SRC_COMMON} vhost_client.c
+SRC_VHOST_SERVER = ${SRC_COMMON} demo/vhost_server.c
+SRC_VHOST_CLIENT = ${SRC_COMMON} demo/vhost_client.c
+SRC_VGPU_HOST = ${SRC_COMMON} vgpu_host.c
 
-all: vhost_server vhost_client
+all: vgpu_host vhost_server vhost_client
 
 # target not used
 vhost: ${SOURCES} ${HEADERS}
 		${CC} ${CFLAGS} ${SOURCES} -o $@ ${LFLAGS}
+
+vgpu_host: ${SRC_VGPU_HOST} ${HEADERS}
+		${CC} ${CFLAGS} ${SRC_VGPU_HOST} -o $@ ${LFLAGS}
 
 vhost_server: ${SRC_VHOST_SERVER} ${HEADERS}
 		${CC} ${CFLAGS} ${SRC_VHOST_SERVER} -o $@ ${LFLAGS}
