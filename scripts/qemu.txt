@@ -1,4 +1,4 @@
-修改xml生成的qemu命令：
+libvirt generated command line from following configuration:
 
     <interface type='vhostuser'>
       <mac address='52:54:00:e3:7b:1a'/>
