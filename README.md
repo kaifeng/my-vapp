@@ -1,3 +1,5 @@
+This is a slimed version of vapp.
+
 vapp is a reference client/server implementation of vhost-user (netdev)
 
 References:
